@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>结算单元 - 访问控制 - 360智汇云</title>
+  <link rel="stylesheet" href="shared/base.css?v=20260907c">
+  <link rel="stylesheet" href="styles.css?v=20260907c">
+</head>
+
+<body>
+  <div class="app">
+    <!-- ============ 顶部导航 ============ -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <span class="logo-mark">360</span>
+          <span>360智汇云</span>
+        </div>
+        <button class="nav-btn">
+          <svg class="ico" viewBox="0 0 16 16" fill="none">
+            <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+            <path d="M4.5 10.5V7M8 10.5V5.5M11.5 10.5V8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          <span>工作台总览</span>
+        </button>
+        <button class="nav-btn group">
+          <svg class="ico" viewBox="0 0 16 16" fill="none">
+            <rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+            <path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          <span>360集团</span>
+        </button>
+      </div>
+      <div class="header-right">
+        <div class="ai-entry">ai</div>
+        <a class="header-link" href="#">费用</a>
+        <a class="header-link" href="#">工单</a>
+        <a class="header-link" href="#">消息<span class="badge">32</span></a>
+        <a class="header-link" href="#">帮助</a>
+        <div class="user-info">
+          <div class="avatar">
+            <svg viewBox="0 0 16 16" fill="none" width="16" height="16">
+              <circle cx="8" cy="5.5" r="2.75" stroke="currentColor" stroke-width="1.2" />
+              <path d="M2.75 13.5c0-2.4 2.35-3.75 5.25-3.75s5.25 1.35 5.25 3.75" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div class="user-meta">
+            <div class="user-name">lujingbao</div>
+            <div class="user-role">子账号</div>
+          </div>
+          <svg class="user-arrow" viewBox="0 0 12 12" fill="none">
+            <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ 主体 ============ -->
+    <div class="container">
+      <!-- 左侧图标栏 -->
+      <nav class="icon-bar">
+        <div class="icon-item top active">
+          <svg viewBox="0 0 20 20" fill="none">
+            <rect x="2.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3" />
+            <rect x="11.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3" />
+            <rect x="2.5" y="11.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3" />
+            <rect x="11.5" y="11.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3" />
+          </svg>
+          <span>全部</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <rect x="2" y="3" width="14" height="10" rx="1.2" stroke="currentColor" stroke-width="1.2" />
+            <path d="M6 15.5h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          <span>工作台</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.2" />
+            <path d="M9 5.5V9l2.5 1.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          <span>最近</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <path d="M9 2.5l1.9 4 4.4.6-3.2 3.1.8 4.3L9 12.5l-3.9 2 .8-4.3-3.2-3.1 4.4-.6L9 2.5z" fill="currentColor" />
+          </svg>
+          <span>收藏</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.2" />
+            <path d="M3 9h12M9 2.6c1.8 2 1.8 10.8 0 12.8M9 2.6C7.2 4.6 7.2 13.4 9 15.4" stroke="currentColor" stroke-width="1.1" />
+          </svg>
+          <span>APIMKT</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <path d="M2.5 4.5A1.5 1.5 0 014 3h10a1.5 1.5 0 011.5 1.5v6A1.5 1.5 0 0114 12H7l-4.5 3V4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+          </svg>
+          <span>对话AIMI</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <path d="M9 2.5l6 3v7l-6 3-6-3v-7l6-3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+            <path d="M3 5.5l6 3 6-3M9 8.5v7" stroke="currentColor" stroke-width="1.1" />
+          </svg>
+          <span>对象OBS</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <rect x="2" y="4" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+            <path d="M7.5 7l4 2-4 2V7z" fill="currentColor" />
+          </svg>
+          <span>视频VS</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <ellipse cx="9" cy="4.5" rx="5.5" ry="2" stroke="currentColor" stroke-width="1.2" />
+            <path d="M3.5 4.5v9c0 1.1 2.5 2 5.5 2s5.5-.9 5.5-2v-9" stroke="currentColor" stroke-width="1.2" />
+            <path d="M3.5 9c0 1.1 2.5 2 5.5 2s5.5-.9 5.5-2" stroke="currentColor" stroke-width="1.2" />
+          </svg>
+          <span>大数据DI</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <rect x="2" y="3.5" width="14" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+            <path d="M7.5 7l4 2-4 2V7z" fill="currentColor" />
+          </svg>
+          <span>直播LIVE</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <rect x="2.5" y="6" width="4" height="7" stroke="currentColor" stroke-width="1.2" />
+            <rect x="7" y="6" width="4" height="7" stroke="currentColor" stroke-width="1.2" />
+            <rect x="4.7" y="3" width="4" height="2.4" stroke="currentColor" stroke-width="1.2" />
+          </svg>
+          <span>容器CRS</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="3" stroke="currentColor" stroke-width="1.2" />
+            <path d="M9 2v2.5M9 13.5V16M2 9h2.5M13.5 9H16M4.2 4.2l1.8 1.8M12 12l1.8 1.8M13.8 4.2L12 6M6 12l-1.8 1.8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+          </svg>
+          <span>记忆AMS</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <rect x="2.5" y="3" width="13" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+            <rect x="2.5" y="10" width="13" height="5" rx="1" stroke="currentColor" stroke-width="1.2" />
+            <path d="M5 5.5h.01M5 12.5h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+          <span>ECS</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <path d="M9 2.5l5.5 3.2v6.6L9 15.5l-5.5-3.2V5.7L9 2.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+          </svg>
+          <span>容器CIS</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.2" />
+            <path d="M6.5 11l2.5-5 2.5 5M7.6 9.6h2.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          <span>AI开发TAI</span>
+        </div>
+      </nav>
+
+      <!-- 中间菜单栏 -->
+      <aside class="sidebar">
+        <div class="sidebar-title">访问控制</div>
+        <div class="menu menu-flat">
+          <div class="menu-link active" data-page="settlementunit">
+            <svg class="menu-ico" viewBox="0 0 16 16" fill="none">
+              <rect x="2.5" y="1.8" width="11" height="12.4" rx="1.2" stroke="currentColor" stroke-width="1.2" />
+              <path d="M5.2 5h5.6M5.2 7.6h3.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+              <circle cx="10.6" cy="10.6" r="2.6" fill="#fff" stroke="currentColor" stroke-width="1.2" />
+              <path d="M9.4 10.6l1 1 1.4-1.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>结算单元</span>
+          </div>
+          <div class="menu-link" data-page="resourcegroup">
+            <svg class="menu-ico" viewBox="0 0 16 16" fill="none">
+              <rect x="2.2" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2" />
+              <rect x="6.7" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2" />
+              <rect x="11.2" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2" />
+            </svg>
+            <span>资源组管理</span>
+            <span class="menu-badge">本期改动</span>
+          </div>
+          <div class="menu-link">
+            <svg class="menu-ico" viewBox="0 0 16 16" fill="none">
+              <ellipse cx="8" cy="4" rx="5.2" ry="2" stroke="currentColor" stroke-width="1.2" />
+              <path d="M2.8 4v8c0 1.1 2.3 2 5.2 2s5.2-.9 5.2-2V4" stroke="currentColor" stroke-width="1.2" />
+              <path d="M2.8 8c0 1.1 2.3 2 5.2 2s5.2-.9 5.2-2" stroke="currentColor" stroke-width="1.2" />
+            </svg>
+            <span>资源管理</span>
+          </div>
+          <div class="menu-link">
+            <svg class="menu-ico" viewBox="0 0 16 16" fill="none">
+              <rect x="2.2" y="2.5" width="11.6" height="3.4" rx="0.8" stroke="currentColor" stroke-width="1.2" />
+              <rect x="2.2" y="7.2" width="11.6" height="3.4" rx="0.8" stroke="currentColor" stroke-width="1.2" />
+              <path d="M2.2 13h11.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+            <span>权限管理</span>
+          </div>
+          <div class="menu-link">
+            <svg class="menu-ico" viewBox="0 0 16 16" fill="none">
+              <circle cx="5.4" cy="10.6" r="2.9" stroke="currentColor" stroke-width="1.2" />
+              <path d="M7.5 8.5l5.6-5.6M10.4 5.6l1.5 1.5M12 4l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+            <span>密钥管理</span>
+          </div>
+          <div class="menu-link">
+            <svg class="menu-ico" viewBox="0 0 16 16" fill="none">
+              <rect x="2.5" y="1.8" width="11" height="12.4" rx="1.2" stroke="currentColor" stroke-width="1.2" />
+              <path d="M5.2 5.2h5.6M5.2 8h5.6M5.2 10.8h3.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+            <span>操作审计</span>
+          </div>
+          <div class="menu-link">
+            <svg class="menu-ico" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="5.8" stroke="currentColor" stroke-width="1.2" />
+              <path d="M8 2.2V8l4.6 3.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+            <span>配额管理</span>
+          </div>
+        </div>
+        <div class="sidebar-collapse">
+          <svg viewBox="0 0 16 16" fill="none" width="16" height="16">
+            <path d="M2.5 4h11M2.5 12h11M9 8h4.5M6.5 6L4 8l2.5 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </aside>
+
+      <!-- ============ 内容区 ============ -->
+      <main class="main-content">
+        <div class="page-title-bar">
+          <h1 class="page-title">结算单元</h1>
+          <a class="page-title-doc" id="help-doc" href="#" hidden>帮助文档</a>
+        </div>
+
+        <div class="content-body">
+          <!-- ===== 视图：结算单元 ===== -->
+          <div class="card view" id="view-settlementunit">
+            <!-- 搜索区 -->
+            <div class="card-toolbar">
+              <div class="search-box">
+                <input type="text" id="search-input" placeholder="请输入结算单元名称搜索" aria-label="请输入结算单元名称搜索">
+                <button class="search-btn" id="search-btn" type="button" aria-label="搜索">
+                  <svg viewBox="0 0 16 16" fill="none">
+                    <circle cx="7" cy="7" r="4.6" stroke="currentColor" stroke-width="1.3" />
+                    <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+                  </svg>
+                </button>
+              </div>
+              <div class="select-box">
+                <select id="su-tag-filter" aria-label="请选择结算单元标签">
+                  <option value="">请选择标签</option>
+                </select>
+              </div>
+              <button class="btn-default btn-tag-manage" id="su-tag-manage" type="button">
+                <svg viewBox="0 0 16 16" fill="none">
+                  <path d="M7.6 1.8H3.2a1.4 1.4 0 00-1.4 1.4v4.4c0 .37.15.73.41.99l5.2 5.2a1.4 1.4 0 001.98 0l4.4-4.4a1.4 1.4 0 000-1.98l-5.2-5.2a1.4 1.4 0 00-.99-.41z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                  <circle cx="5" cy="5" r="1.1" fill="currentColor" />
+                </svg>
+                <span>标签管理</span>
+              </button>
+            </div>
+
+            <!-- 批量操作条：选中行后出现 -->
+            <div class="batch-bar" id="su-batch-bar" hidden>
+              <span class="batch-info">已选择 <b id="su-selected-count">0</b> 个结算单元</span>
+              <button class="btn-primary btn-sm" id="su-batch-tag" type="button">批量设置标签</button>
+              <button class="btn-link" id="su-clear-select" type="button">取消选择</button>
+            </div>
+
+            <!-- 表格 -->
+            <div class="table-wrap">
+              <table class="data-table">
+                <colgroup>
+                  <col style="width: 44px">
+                  <col style="width: 22%">
+                  <col style="width: 14%">
+                  <col style="width: 25%">
+                  <col style="width: 23%">
+                  <col style="width: 12%">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th class="col-check">
+                      <label class="chk">
+                        <input type="checkbox" id="su-check-all" aria-label="全选当前页">
+                        <span class="chk-box"></span>
+                      </label>
+                    </th>
+                    <th>结算单元名称</th>
+                    <th>标签</th>
+                    <th>关联组织架构</th>
+                    <th>结算单元管理员</th>
+                    <th class="col-num">资源组数量</th>
+                  </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+              </table>
+              <div class="empty-tip" id="empty-tip" hidden>暂无匹配的结算单元</div>
+            </div>
+
+            <!-- 分页 -->
+            <div class="pagination">
+              <div class="page-summary">
+                共 <span class="num" id="total-count">0</span> 条记录
+                第 <span class="num" id="current-page">1</span> / <span id="total-pages">1</span> 页
+              </div>
+              <div class="page-controls">
+                <button class="page-btn nav" id="prev-page" type="button" aria-label="上一页">
+                  <svg viewBox="0 0 12 12" fill="none">
+                    <path d="M7.5 2L3.5 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <div class="pager" id="pager"></div>
+                <button class="page-btn nav" id="next-page" type="button" aria-label="下一页">
+                  <svg viewBox="0 0 12 12" fill="none">
+                    <path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <div class="page-size">
+                  <select id="page-size" aria-label="每页条数">
+                    <option value="10">10 条/页</option>
+                    <option value="20">20 条/页</option>
+                    <option value="50">50 条/页</option>
+                    <option value="100">100 条/页</option>
+                  </select>
+                </div>
+                <div class="page-jump">
+                  <span>跳至</span>
+                  <input type="text" id="jump-input" aria-label="跳至页码">
+                  <span>页</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== 视图：资源组管理 ===== -->
+          <div class="card view" id="view-resourcegroup" hidden>
+            <!-- 搜索区 -->
+            <div class="card-toolbar">
+              <div class="search-box">
+                <input type="text" id="rg-search-input" placeholder="请输入资源组ID或名称搜索" aria-label="请输入资源组ID或名称搜索">
+                <button class="search-btn" id="rg-search-btn" type="button" aria-label="搜索">
+                  <svg viewBox="0 0 16 16" fill="none">
+                    <circle cx="7" cy="7" r="4.6" stroke="currentColor" stroke-width="1.3" />
+                    <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+                  </svg>
+                </button>
+              </div>
+              <div class="select-box">
+                <select id="rg-unit-filter" aria-label="请选择结算单元">
+                  <option value="">请选择结算单元</option>
+                </select>
+              </div>
+              <div class="tag-select">
+                <input type="text" id="rg-tag-input" class="tag-input" placeholder="请选择标签" aria-label="请选择标签" autocomplete="off">
+                <button class="tag-clear" id="rg-tag-clear" type="button" aria-label="清除标签" hidden>
+                  <svg viewBox="0 0 12 12" fill="none">
+                    <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                  </svg>
+                </button>
+                <div class="tag-dropdown" id="rg-tag-dropdown" hidden></div>
+              </div>
+              <button class="btn-default btn-tag-manage" id="rg-tag-manage" type="button">
+                <svg viewBox="0 0 16 16" fill="none">
+                  <path d="M7.6 1.8H3.2a1.4 1.4 0 00-1.4 1.4v4.4c0 .37.15.73.41.99l5.2 5.2a1.4 1.4 0 001.98 0l4.4-4.4a1.4 1.4 0 000-1.98l-5.2-5.2a1.4 1.4 0 00-.99-.41z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                  <circle cx="5" cy="5" r="1.1" fill="currentColor" />
+                </svg>
+                <span>标签管理</span>
+              </button>
+              <button class="btn-primary" id="rg-create" type="button">创建资源组</button>
+            </div>
+
+            <!-- 批量操作条：选中行后出现 -->
+            <div class="batch-bar" id="rg-batch-bar" hidden>
+              <span class="batch-info">已选择 <b id="rg-selected-count">0</b> 个资源组</span>
+              <button class="btn-primary btn-sm" id="rg-batch-tag" type="button">批量设置标签</button>
+              <button class="btn-link" id="rg-clear-select" type="button">取消选择</button>
+            </div>
+
+            <!-- 表格 -->
+            <div class="table-wrap">
+              <table class="data-table">
+                <colgroup>
+                  <col style="width: 44px">
+                  <col style="width: 19%">
+                  <col style="width: 9%">
+                  <col style="width: 8%">
+                  <col style="width: 17%">
+                  <col style="width: 22%">
+                  <col style="width: 14%">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th class="col-check">
+                      <label class="chk">
+                        <input type="checkbox" id="rg-check-all" aria-label="全选当前页">
+                        <span class="chk-box"></span>
+                      </label>
+                    </th>
+                    <th>资源组名称</th>
+                    <th>资源组ID</th>
+                    <th>资源数量</th>
+                    <th>标签</th>
+                    <th>所属结算单元</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="rg-table-body"></tbody>
+              </table>
+              <div class="empty-tip" id="rg-empty-tip" hidden>暂无匹配的资源组</div>
+            </div>
+
+            <!-- 分页 -->
+            <div class="pagination">
+              <div class="page-summary">
+                共 <span class="num" id="rg-total-count">0</span> 条记录
+                第 <span class="num" id="rg-current-page">1</span> / <span id="rg-total-pages">1</span> 页
+              </div>
+              <div class="page-controls">
+                <button class="page-btn nav" id="rg-prev-page" type="button" aria-label="上一页">
+                  <svg viewBox="0 0 12 12" fill="none">
+                    <path d="M7.5 2L3.5 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <div class="pager" id="rg-pager"></div>
+                <button class="page-btn nav" id="rg-next-page" type="button" aria-label="下一页">
+                  <svg viewBox="0 0 12 12" fill="none">
+                    <path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <div class="page-size">
+                  <select id="rg-page-size" aria-label="每页条数">
+                    <option value="10">10 条/页</option>
+                    <option value="20">20 条/页</option>
+                    <option value="50">50 条/页</option>
+                    <option value="100">100 条/页</option>
+                  </select>
+                </div>
+                <div class="page-jump">
+                  <span>跳至</span>
+                  <input type="text" id="rg-jump-input" aria-label="跳至页码">
+                  <span>页</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- 右侧悬浮工具条 -->
+    <div class="side-fab">
+      <div class="fab-btn" title="小程序码">
+        <svg viewBox="0 0 20 20" fill="none">
+          <rect x="2.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3" />
+          <rect x="11.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3" />
+          <rect x="2.5" y="11.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3" />
+          <path d="M11.5 11.5h3v3h3v3h-6v-6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <div class="fab-btn primary" title="意见反馈">
+        <svg viewBox="0 0 20 20" fill="none">
+          <path d="M3 4.5h9M3 8.5h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M11 15.5l6-6 1.5 1.5-6 6H11v-1.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+          <path d="M3 12.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="fab-btn ai" title="AI 助手">ai</div>
+    </div>
+
+    <!-- ============ 标签管理抽屉 ============ -->
+    <div class="drawer-mask" id="tag-mask" hidden></div>
+    <aside class="drawer" id="tag-drawer" hidden aria-label="标签管理">
+      <div class="drawer-header">
+        <span class="drawer-title" id="tag-drawer-title">标签管理</span>
+        <button class="drawer-close" id="tag-drawer-close" type="button" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none">
+            <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-body">
+        <p class="drawer-tip" id="tag-drawer-tip"></p>
+
+        <!-- 新增标签 + 标签名称搜索 -->
+        <div class="tag-create">
+          <button class="btn-primary" id="tag-add-btn" type="button">添加标签</button>
+          <div class="search-box tag-search-box">
+            <input type="text" id="tag-search-input" placeholder="请输入标签名称搜索" aria-label="请输入标签名称搜索">
+            <button class="search-btn" id="tag-search-btn" type="button" aria-label="搜索">
+              <svg viewBox="0 0 16 16" fill="none">
+                <circle cx="7" cy="7" r="4.6" stroke="currentColor" stroke-width="1.3" />
+                <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 标签列表 -->
+        <div class="tag-list-head">
+          <span>标签名称</span>
+          <span class="tag-list-head-right" id="tag-list-head-right">关联结算单元</span>
+        </div>
+        <ul class="tag-list" id="tag-list"></ul>
+        <div class="empty-tip" id="tag-list-empty" hidden>暂无标签，请先添加</div>
+      </div>
+    </aside>
+
+    <!-- ============ 标签名称弹窗（添加 / 编辑标签） ============ -->
+    <div class="modal-mask" id="tag-name-mask" hidden>
+      <div class="modal modal-tag-name" role="dialog" aria-label="标签名称">
+        <div class="modal-header">
+          <span class="modal-title" id="tag-name-title">添加标签</span>
+          <button class="drawer-close" id="tag-name-close" type="button" aria-label="关闭">
+            <svg viewBox="0 0 14 14" fill="none">
+              <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <label class="form-label required" for="tag-name-input">标签名称</label>
+            <div class="form-control">
+              <input type="text" id="tag-name-input" class="form-input" maxlength="12" placeholder="请输入标签名称" aria-label="标签名称">
+            </div>
+          </div>
+          <div class="form-error" id="tag-name-error" hidden></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-default" id="tag-name-cancel" type="button">取消</button>
+          <button class="btn-primary" id="tag-name-confirm" type="button">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 批量设置标签弹窗 ============ -->
+    <div class="modal-mask" id="batch-mask" hidden>
+      <div class="modal" role="dialog" aria-label="批量设置标签">
+        <div class="modal-header">
+          <span class="modal-title">批量设置标签</span>
+          <button class="drawer-close" id="batch-close" type="button" aria-label="关闭">
+            <svg viewBox="0 0 14 14" fill="none">
+              <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">已选择 <b id="batch-count">0</b> 个<span id="batch-entity">结算单元</span>，设置后将覆盖它们原有的标签。</p>
+          <div class="form-row">
+            <label class="form-label" for="batch-tag-select">标签</label>
+            <div class="select-box form-control">
+              <select id="batch-tag-select">
+                <option value="">请选择标签</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row form-row-sub">
+            <span class="form-label"></span>
+            <label class="chk chk-inline form-control">
+              <input type="checkbox" id="batch-clear-tag">
+              <span class="chk-box"></span>
+              <span class="chk-text">清空所选<span id="batch-clear-entity">结算单元</span>的标签</span>
+            </label>
+          </div>
+          <div class="form-error" id="batch-error" hidden></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-default" id="batch-cancel" type="button">取消</button>
+          <button class="btn-primary" id="batch-confirm" type="button">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 创建 / 编辑资源组弹窗 ============ -->
+    <div class="modal-mask" id="rg-form-mask" hidden>
+      <div class="modal modal-rg-form" role="dialog" aria-label="创建资源组">
+        <div class="modal-header">
+          <span class="modal-title" id="rg-form-title">创建资源组</span>
+          <button class="drawer-close" id="rg-form-close" type="button" aria-label="关闭">
+            <svg viewBox="0 0 14 14" fill="none">
+              <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <label class="form-label required" for="rg-form-name">资源组名称</label>
+            <div class="form-control">
+              <input type="text" id="rg-form-name" class="form-input" maxlength="50" placeholder="请输入资源组名称" aria-label="资源组名称">
+            </div>
+          </div>
+          <div class="form-error" id="rg-form-name-error" hidden></div>
+
+          <div class="form-row">
+            <label class="form-label required" for="rg-form-unit">所属结算单元</label>
+            <div class="select-box form-control">
+              <select id="rg-form-unit" aria-label="所属结算单元">
+                <option value="">请选择结算单元</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-error" id="rg-form-unit-error" hidden></div>
+
+          <div class="form-row">
+            <label class="form-label" for="rg-form-tag">标签</label>
+            <div class="select-box form-control">
+              <select id="rg-form-tag" aria-label="标签（非必填）">
+                <option value="">请选择标签（非必填）</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-default" id="rg-form-cancel" type="button">取消</button>
+          <button class="btn-primary" id="rg-form-confirm" type="button">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 移除标签确认弹窗 ============ -->
+    <div class="modal-mask" id="confirm-mask" hidden>
+      <div class="modal modal-confirm" role="dialog" aria-label="移除标签">
+        <div class="modal-header">
+          <span class="modal-title">移除标签</span>
+          <button class="drawer-close" id="confirm-close" type="button" aria-label="关闭">
+            <svg viewBox="0 0 14 14" fill="none">
+              <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body confirm-body">
+          <svg class="confirm-ico" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="8.5" stroke="currentColor" stroke-width="1.4" />
+            <path d="M10 5.8v5M10 13.6v.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+          <div class="confirm-text" id="confirm-text"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-default" id="confirm-cancel" type="button">取消</button>
+          <button class="btn-danger" id="confirm-ok" type="button">确定移除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ Toast ============ -->
+    <div class="toast" id="toast" hidden>
+      <svg class="toast-ico" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3" />
+        <path d="M5 8.2l2 2 4-4.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span id="toast-text"></span>
+    </div>
+  </div>
+
+  <script src="app.js?v=20260907b"></script>
+</body>
+
+</html>
