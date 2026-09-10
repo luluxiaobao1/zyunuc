@@ -694,21 +694,36 @@
   }
 
   /* ---------- 确认弹窗（通用） ---------- */
+  // opts: { title, okText, danger, hideCancel, onCancel }
+  // danger=false 时确定按钮走主色（用于「确定修改」这类非危险操作）
   var confirmAction = null;
-  function openConfirm(text, onOk) {
+  var confirmCancelAction = null;
+  function openConfirm(text, onOk, opts) {
+    opts = opts || {};
+    var ok = $('confirm-ok');
+    $('confirm-title').textContent = opts.title || '移除标签';
     $('confirm-text').innerHTML = text;
+    ok.textContent = opts.okText || '确定移除';
+    ok.classList.toggle('btn-danger', opts.danger !== false);
+    ok.classList.toggle('btn-primary', opts.danger === false);
+    $('confirm-cancel').hidden = !!opts.hideCancel;
     confirmAction = onOk;
+    confirmCancelAction = opts.onCancel || null;
     $('confirm-mask').hidden = false;
   }
-  function closeConfirm() {
+  // silent=true 表示由「确定」触发，不再回调 onCancel
+  function closeConfirm(silent) {
+    var fn = confirmCancelAction;
     $('confirm-mask').hidden = true;
     confirmAction = null;
+    confirmCancelAction = null;
+    if (!silent && fn) fn();
   }
-  $('confirm-cancel').addEventListener('click', closeConfirm);
-  $('confirm-close').addEventListener('click', closeConfirm);
+  $('confirm-cancel').addEventListener('click', function () { closeConfirm(); });
+  $('confirm-close').addEventListener('click', function () { closeConfirm(); });
   $('confirm-ok').addEventListener('click', function () {
     var fn = confirmAction;
-    closeConfirm();
+    closeConfirm(true);
     if (fn) fn();
   });
   $('confirm-mask').addEventListener('click', function (e) {
@@ -895,8 +910,10 @@
   }
 
   // 填充结算单元选择下拉（仅资源组标签弹窗）
-  function fillTagNameUnitOptions(selectedUnit) {
+  // 需求4：编辑标签时归属结算单元不可修改，下拉置灰只读
+  function fillTagNameUnitOptions(selectedUnit, readonly) {
     var unitRow = $('tag-name-dept-row');
+    var hintRow = $('tag-name-dept-hint-row');
     var sel = $('tag-name-dept');
     if (tagScope.hasUnit) {
       sel.innerHTML = '<option value="">请选择归属结算单元</option>' +
@@ -904,9 +921,13 @@
           return '<option value="' + escapeHtml(u) + '">' + escapeHtml(u) + '</option>';
         }).join('');
       sel.value = selectedUnit || '';
+      sel.disabled = !!readonly;
       unitRow.hidden = false;
+      if (hintRow) hintRow.hidden = !readonly;
     } else {
       unitRow.hidden = true;
+      sel.disabled = false;
+      if (hintRow) hintRow.hidden = true;
     }
   }
 
@@ -927,7 +948,7 @@
     } else {
       input.value = '';
     }
-    fillTagNameUnitOptions(editUnit);
+    fillTagNameUnitOptions(editUnit, mode === 'edit');
     $('tag-name-mask').hidden = false;
     setTimeout(function () { input.focus(); if (mode === 'edit') input.select(); }, 0);
   }
@@ -954,6 +975,11 @@
     var input = $('tag-name-input');
     var name = input.value.trim();
     var unit = tagScope.hasUnit ? ($('tag-name-dept').value || null) : null;
+    // 需求4：编辑态归属结算单元只读，始终沿用原值
+    if (tagScope.hasUnit && tagNameMode === 'edit' && tagNameEditId) {
+      var cur = tagScope.find(tagNameEditId);
+      if (cur) unit = cur.unit || null;
+    }
 
     // 带结算单元维度时，结算单元必填
     if (tagScope.hasUnit && !unit) {
@@ -1055,23 +1081,47 @@
     $('batch-entity').textContent = scope.entity;
     $('batch-clear-entity').textContent = scope.entity;
     var sel = $('batch-tag-select');
-    // 资源组标签按结算单元分组，避免重名混淆
+
+    // 需求2：资源组批量设置时，标签范围锁定在所选资源组的结算单元下
     if (scope.hasUnit) {
-      var grouped = '';
-      scope.units().forEach(function (u) {
-        var uTags = scope.tags().filter(function (t) { return t.unit === u; });
-        if (!uTags.length) return;
-        grouped += '<optgroup label="' + escapeHtml(u) + '">' +
-          uTags.map(function (t) {
-            return '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
-          }).join('') + '</optgroup>';
+      // 收集被选中资源组的结算单元（去重）
+      var unitSet = Object.create(null);
+      GROUPS.forEach(function (g) {
+        if (selectedGroups[g.id]) unitSet[g.unit] = true;
       });
-      sel.innerHTML = '<option value="">请选择标签</option>' + grouped;
+      var unitList = Object.keys(unitSet);
+      // 需求1：跨结算单元不允许批量设置，提示先选择结算单元
+      if (unitList.length !== 1) {
+        openConfirm('只能批量设置同一结算单元下资源组的标签，请先选择结算单元。', null, {
+          title: '提示',
+          okText: '我知道了',
+          danger: false,
+          hideCancel: true
+        });
+        return;
+      }
+      var batchUnit = unitList[0];
+
+      // 需求2：标签选项仅保留该结算单元下的标签
+      sel.innerHTML = '<option value="">请选择标签</option>' +
+        scope.tags().filter(function (t) { return t.unit === batchUnit; })
+          .map(function (t) {
+            return '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
+          }).join('');
+
+      // 需求2：标签上方展示所选资源组的结算单元
+      $('batch-unit-row').hidden = false;
+      $('batch-unit-hint-row').hidden = false;
+      $('batch-unit-name').textContent = batchUnit;
+      $('batch-unit-name').title = batchUnit;
     } else {
       sel.innerHTML = '<option value="">请选择标签</option>' + scope.tags().map(function (t) {
         return '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
       }).join('');
+      $('batch-unit-row').hidden = true;
+      $('batch-unit-hint-row').hidden = true;
     }
+
     sel.value = '';
     sel.disabled = false;
     $('batch-clear-tag').checked = false;
@@ -1110,12 +1160,26 @@
     var tagId = clear ? null : parseInt(val, 10);
     var n = scope.selectedCount();
     var name = clear ? '' : scope.find(tagId).name;
-    scope.assign(tagId);
-    closeBatchModal();
-    scope.clearSelection();
-    toast(clear
-      ? '已清空 ' + n + ' 个' + scope.entity + '的标签'
-      : '已为 ' + n + ' 个' + scope.entity + '设置标签「' + name + '」');
+
+    // 需求3：确定后先二次确认，确认通过才真正写入
+    var msg = clear
+      ? '选中 ' + n + ' 个' + scope.entity + '的标签将会被<b>清空</b>，确定修改？'
+      : '选中 ' + n + ' 个' + scope.entity + '的标签将会更新成「<b>' + escapeHtml(name) + '</b>」，确定修改？';
+    $('batch-mask').hidden = true;   // 暂时收起批量弹框，保留其中已填内容
+    openConfirm(msg, function () {
+      scope.assign(tagId);
+      closeBatchModal();
+      scope.clearSelection();
+      toast(clear
+        ? '已清空 ' + n + ' 个' + scope.entity + '的标签'
+        : '已为 ' + n + ' 个' + scope.entity + '设置标签「' + name + '」');
+    }, {
+      title: '确认修改标签',
+      okText: '确定修改',
+      danger: false,
+      // 取消 / 关闭：退回批量设置弹框，已选内容保留
+      onCancel: function () { $('batch-mask').hidden = false; }
+    });
   });
 
   // Esc 统一关闭浮层
@@ -1243,6 +1307,17 @@
 
   rgCheckAll.addEventListener('change', function () {
     var on = rgCheckAll.checked;
+    // 需求1：全选只能在锁定单一结算单元时进行，否则提示先选择结算单元
+    if (on && !$('rg-unit-filter').value) {
+      rgCheckAll.checked = false;
+      openConfirm('只能批量设置同一结算单元下资源组的标签，请先选择结算单元。', null, {
+        title: '提示',
+        okText: '我知道了',
+        danger: false,
+        hideCancel: true
+      });
+      return;
+    }
     rgList.pageRows().forEach(function (r) { setRgSelected(r.id, on); });
     syncRgBatchBar();
     rgList.render();

@@ -825,6 +825,10 @@
               </select>
             </div>
           </div>
+          <div class="form-row form-row-sub" id="tag-name-dept-hint-row" hidden>
+            <span class="form-label"></span>
+            <p class="form-hint form-control">归属结算单元创建后不可修改。</p>
+          </div>
           <div class="form-error" id="tag-name-dept-error" hidden></div>
         </div>
         <div class="modal-footer">
@@ -847,6 +851,11 @@
         </div>
         <div class="modal-body">
           <p class="modal-desc">已选择 <b id="batch-count">0</b> 个<span id="batch-entity">结算单元</span>，设置后将覆盖它们原有的标签。</p>
+          <!-- 归属结算单元（仅资源组：展示所选资源组所属的结算单元，只读） -->
+          <div class="form-row" id="batch-unit-row" hidden>
+            <span class="form-label">结算单元</span>
+            <p class="form-static form-control" id="batch-unit-name">-</p>
+          </div>
           <div class="form-row">
             <label class="form-label" for="batch-tag-select">标签</label>
             <div class="select-box form-control">
@@ -862,6 +871,10 @@
               <span class="chk-box"></span>
               <span class="chk-text">清空所选<span id="batch-clear-entity">结算单元</span>的标签</span>
             </label>
+          </div>
+          <div class="form-row form-row-sub" id="batch-unit-hint-row" hidden>
+            <span class="form-label"></span>
+            <p class="form-hint form-control">仅可选择该结算单元下的标签。</p>
           </div>
           <div class="form-error" id="batch-error" hidden></div>
         </div>
@@ -922,11 +935,11 @@
       </div>
     </div>
 
-    <!-- ============ 移除标签确认弹窗 ============ -->
+    <!-- ============ 通用确认弹窗（移除标签 / 批量设置标签二次确认 / 操作提示） ============ -->
     <div class="modal-mask" id="confirm-mask" hidden>
-      <div class="modal modal-confirm" role="dialog" aria-label="移除标签">
+      <div class="modal modal-confirm" role="dialog" aria-label="操作确认">
         <div class="modal-header">
-          <span class="modal-title">移除标签</span>
+          <span class="modal-title" id="confirm-title">移除标签</span>
           <button class="drawer-close" id="confirm-close" type="button" aria-label="关闭">
             <svg viewBox="0 0 14 14" fill="none">
               <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
@@ -940,7 +953,7 @@
           </svg>
           <div class="confirm-text" id="confirm-text"></div>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer" id="confirm-footer">
           <button class="btn-default" id="confirm-cancel" type="button">取消</button>
           <button class="btn-danger" id="confirm-ok" type="button">确定移除</button>
         </div>

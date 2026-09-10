@@ -1696,6 +1696,18 @@
   color: var(--text-tertiary);
 }
 
+/* form-static：表单内只读文本（如批量设置标签的结算单元） */
+.form-static {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 32px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* 必填字段红色星号 */
 .form-label.required::before {
   content: '*';
@@ -1710,6 +1722,8 @@
   padding: 12px 20px;
   border-top: 1px solid var(--border-light);
 }
+/* 纯提示型确认弹窗：隐藏取消按钮 */
+.modal-footer button[hidden] { display: none; }
 .btn-danger {
   height: 32px;
   padding: 0 16px;
