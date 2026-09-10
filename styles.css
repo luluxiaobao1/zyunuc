@@ -168,6 +168,13 @@
   border-color: var(--primary-color);
 }
 
+/* 禁用态（如资源组表单：未选结算单元时标签下拉不可用） */
+.select-box select:disabled {
+  background-color: var(--bg-gray);
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+}
+
 /* 未选择时显示占位色 */
 .select-box select.placeholder {
   color: var(--text-tertiary);
@@ -306,6 +313,496 @@
 
 .link-num:hover {
   text-decoration: underline;
+}
+
+/* ============ 工作台总览页 ============ */
+.dashboard-page {
+  position: fixed;
+  inset: 50px 0 0 0;
+  background: var(--background-color);
+  overflow-y: auto;
+  z-index: 90;
+}
+
+.dashboard-body {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+/* 顶部功能导航 */
+.dash-nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--card-background);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 1px 4px rgba(49,49,71,.06);
+  overflow: hidden;
+}
+
+.dash-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 var(--spacing-xl);
+  font-size: 14px;
+  color: var(--text-primary);
+  text-decoration: none;
+  border-right: 1px solid var(--border-light);
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.dash-nav-item:last-child { border-right: none; }
+.dash-nav-item svg { width: 15px; height: 15px; color: var(--text-secondary); }
+.dash-nav-item:hover { background: var(--background-color); color: var(--primary-color); }
+.dash-nav-item:hover svg { color: var(--primary-color); }
+
+/* 产品搜索 */
+.dash-search-wrap {
+  margin-bottom: var(--spacing-lg);
+}
+
+.dash-search-box {
+  position: relative;
+  max-width: 560px;
+}
+
+.dash-search-ico {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.dash-search-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px 0 38px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background: var(--card-background);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.dash-search-input::placeholder { color: var(--text-tertiary); }
+.dash-search-input:focus { border-color: var(--primary-color); }
+
+/* 两栏布局 */
+.dash-two-col {
+  display: flex;
+  gap: var(--spacing-lg);
+  align-items: flex-start;
+}
+
+.dash-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.dash-aside {
+  width: 300px;
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* section 公共 */
+.dash-section {
+  background: var(--card-background);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  box-shadow: 0 1px 4px rgba(49,49,71,.06);
+}
+
+.dash-section-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+/* 工作台入口格 */
+.dash-workbench-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-md);
+}
+
+.dash-wb-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  height: 52px;
+  padding: 0 var(--spacing-md);
+  background: var(--background-color);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  font-size: 13px;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.dash-wb-card:hover { border-color: var(--primary-color); box-shadow: 0 2px 8px rgba(0,102,255,.1); }
+
+.dash-wb-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--border-radius-md);
+  flex-shrink: 0;
+}
+
+.dash-wb-thumb-blue   { background: linear-gradient(135deg, #60a5fa, #2563eb); }
+.dash-wb-thumb-purple { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+.dash-wb-thumb-teal   { background: linear-gradient(135deg, #34d399, #059669); }
+.dash-wb-thumb-orange { background: linear-gradient(135deg, #fb923c, #ea580c); }
+.dash-wb-thumb-cyan   { background: linear-gradient(135deg, #22d3ee, #0891b2); }
+.dash-wb-thumb-green  { background: linear-gradient(135deg, #86efac, #16a34a); }
+.dash-wb-thumb-red    { background: linear-gradient(135deg, #f87171, #dc2626); }
+
+.dash-wb-card span {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-wb-arrow {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+}
+
+/* 资源概览 tabs */
+.dash-resource-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: var(--spacing-md);
+}
+
+.dash-tab {
+  height: 34px;
+  padding: 0 var(--spacing-md);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: -1px;
+}
+
+.dash-tab:hover { color: var(--primary-color); }
+.dash-tab.active { color: var(--primary-color); border-bottom-color: var(--primary-color); font-weight: 500; }
+
+/* 资源概览卡片网格 */
+.dash-resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.dash-res-card {
+  display: block;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dash-res-card:hover { border-color: var(--primary-color); box-shadow: 0 2px 8px rgba(0,102,255,.1); }
+
+.dash-res-card-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--background-color);
+}
+
+.dash-res-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--border-radius-md);
+  flex-shrink: 0;
+}
+
+.dash-res-thumb-sms  { background: linear-gradient(135deg, #fde68a, #d97706); }
+.dash-res-thumb-cdn  { background: linear-gradient(135deg, #6ee7b7, #059669); }
+.dash-res-thumb-aimi { background: linear-gradient(135deg, #c4b5fd, #7c3aed); }
+.dash-res-thumb-mpc  { background: linear-gradient(135deg, #93c5fd, #2563eb); }
+.dash-res-thumb-iot  { background: linear-gradient(135deg, #fdba74, #ea580c); }
+
+.dash-res-info { flex: 1; min-width: 0; }
+
+.dash-res-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-res-count {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+
+.dash-res-num { color: var(--primary-color); }
+
+.dash-res-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* 更多产品 */
+.dash-more-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dash-open-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.dash-open-link:hover { text-decoration: underline; }
+
+.dash-more-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.dash-more-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  background: var(--card-background);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dash-more-card:hover { border-color: var(--primary-color); box-shadow: 0 2px 8px rgba(0,102,255,.1); }
+
+.dash-more-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--border-radius-md);
+  flex-shrink: 0;
+}
+
+.dash-more-icon-fc   { background: linear-gradient(135deg, #bfdbfe, #3b82f6); }
+.dash-more-icon-api  { background: linear-gradient(135deg, #bbf7d0, #22c55e); }
+.dash-more-icon-mq   { background: linear-gradient(135deg, #fde68a, #f59e0b); }
+.dash-more-icon-pcdn { background: linear-gradient(135deg, #e9d5ff, #a855f7); }
+.dash-more-icon-cm   { background: linear-gradient(135deg, #fed7aa, #f97316); }
+
+.dash-more-info { flex: 1; min-width: 0; }
+.dash-more-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.dash-more-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; line-height: 1.4; }
+.dash-more-open { font-size: 12px; color: var(--primary-color); margin-top: 6px; }
+
+/* 右侧面板 */
+.dash-user-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--card-background);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 1px 4px rgba(49,49,71,.06);
+}
+
+.dash-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e0e7ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.dash-user-name { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+
+.dash-user-verified {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--success-color);
+  margin-top: 2px;
+}
+
+.dash-user-info-rows {
+  background: var(--card-background);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  box-shadow: 0 1px 4px rgba(49,49,71,.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dash-info-row {
+  font-size: 12px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.dash-info-label { color: var(--text-secondary); white-space: nowrap; }
+
+.dash-info-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--tag-bg);
+  color: var(--primary-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 11px;
+}
+
+.dash-info-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.dash-info-link:hover { text-decoration: underline; }
+
+.dash-info-row-link { align-items: flex-start; }
+
+/* 面板（费用/消息） */
+.dash-panel {
+  background: var(--card-background);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  box-shadow: 0 1px 4px rgba(49,49,71,.06);
+}
+
+.dash-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.dash-panel-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+
+.dash-panel-link {
+  font-size: 12px;
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.dash-panel-link:hover { text-decoration: underline; }
+
+.dash-fee-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.5;
+}
+
+.dash-fee-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.dash-fee-label { font-size: 12px; color: var(--text-secondary); }
+
+.dash-fee-amount {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 消息通知 */
+.dash-notice-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.dash-notice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dash-notice-date {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.dash-notice-text {
+  color: var(--text-primary);
+  flex: 1;
+  min-width: 0;
 }
 
 /* ============ 标签 chip ============ */
@@ -886,7 +1383,6 @@
 .tag-create .tag-search-box {
   position: relative;
   flex: 0 1 240px;
-  margin-left: auto;
 }
 .tag-create .tag-search-box input {
   width: 100%;
@@ -932,15 +1428,84 @@
   padding-right: 92px;
 }
 
+/* 筛选组：归属结算单元 + 标签名称搜索，整体靠右 */
+.tag-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+/* 结算单元筛选行 */
+.tag-dept-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* display:flex 会覆盖 hidden 属性，需显式还原 */
+.tag-dept-filter-row[hidden] {
+  display: none;
+}
+.tag-dept-filter-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex: none;
+}
+.tag-dept-filter-select {
+  flex: 0 0 240px;
+}
+.tag-dept-filter-select select {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background: #fff;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.tag-dept-filter-select select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
 /* 抽屉变宽后，标签名列固定宽度，右侧列不被拉散 */
 .tag-list-head > span:first-child {
-  flex: 0 0 320px;
-  max-width: 320px;
+  flex: 0 0 200px;
+  max-width: 200px;
 }
-.tag-list .tag-item > .tag-chip {
-  width: fit-content;
-  flex: 0 0 auto;
-  max-width: 320px;
+/* 归属结算单元列（仅资源组标签显示）：列宽放开，名称完整展示 */
+.tag-list-head-dept {
+  flex: 0 0 260px;
+  max-width: 260px;
+  font-size: 13px;
+}
+/* 标签名单元格：撑住列宽，内部 chip 只包裹文字本身 */
+.tag-item-name {
+  flex: 0 0 200px;
+  max-width: 200px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.tag-item-name > .tag-chip {
+  display: inline-block;
+  max-width: 100%;
+  height: 22px;
+  line-height: 22px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 归属结算单元单元格：不截断，超长时换行完整展示 */
+.tag-item-dept {
+  flex: 0 0 260px;
+  max-width: 260px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  white-space: normal;
+  word-break: break-word;
 }
 
 /* 标签列表 */
@@ -992,7 +1557,14 @@
 .tag-item .btn-link.danger { color: var(--text-secondary); }
 .tag-item .btn-link.danger:hover { color: var(--error-color); }
 
-/* 抽屉内标签列表的空态：接在列表框下方 */
+/* form-hint：表单辅助说明文字 */
+.form-hint {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+}
 #tag-list-empty {
   padding: 32px 0;
   border: 1px solid var(--border-color);
@@ -1092,12 +1664,16 @@
   margin-left: 108px;
 }
 
-/* 标签名称弹窗：字段标签「标签名称」 */
+/* 标签名称弹窗：最长字段标签为「归属结算单元」，弹窗加宽且标签不折行 */
+.modal-tag-name {
+  width: 520px;
+}
 .modal-tag-name .form-label {
-  width: 72px;
+  width: 98px;
+  white-space: nowrap;
 }
 .modal-tag-name .form-error {
-  margin-left: 84px;
+  margin-left: 110px;
 }
 
 /* 表单输入框（创建/编辑资源组等通用弹窗字段） */

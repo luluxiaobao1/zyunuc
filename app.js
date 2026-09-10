@@ -8,6 +8,73 @@
 
   var $ = function (id) { return document.getElementById(id); };
 
+  /* ==========================================================
+     工作台总览页切换
+     ========================================================== */
+  function initDashboard() {
+    var dashPage = $('dashboard-page');
+    var mainContainer = $('main-container');
+    // 找到文字包含「工作台总览」的 nav-btn
+    var dashBtn = null;
+    var navBtns = document.querySelectorAll('.nav-btn');
+    for (var i = 0; i < navBtns.length; i++) {
+      if (navBtns[i].textContent.indexOf('工作台总览') > -1) {
+        dashBtn = navBtns[i];
+        break;
+      }
+    }
+
+    if (!dashBtn || !dashPage || !mainContainer) return;
+
+    // 标签页切换通用函数
+    function initTabs(section) {
+      var tabs = section.querySelectorAll('.dash-tab');
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          tabs.forEach(function (t) { t.classList.remove('active'); });
+          tab.classList.add('active');
+        });
+      });
+    }
+
+    // 初始化所有 tab 区域
+    dashPage.querySelectorAll('.dash-section').forEach(function (sec) { initTabs(sec); });
+
+    function showDashboard() {
+      dashPage.hidden = false;
+      mainContainer.hidden = true;
+      dashBtn.style.background = '#EEF6FF';
+      dashBtn.style.color = 'var(--primary-color)';
+      dashBtn.style.borderColor = 'var(--primary-color)';
+    }
+
+    function hideDashboard() {
+      dashPage.hidden = true;
+      mainContainer.hidden = false;
+      dashBtn.style.background = '';
+      dashBtn.style.color = '';
+      dashBtn.style.borderColor = '';
+    }
+
+    dashBtn.addEventListener('click', function () {
+      if (!dashPage.hidden) {
+        hideDashboard();
+      } else {
+        showDashboard();
+      }
+    });
+
+    // 点击菜单链接时关闭总览页、切回正常视图
+    document.querySelectorAll('.menu-link[data-page]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (!dashPage.hidden) hideDashboard();
+      });
+    });
+  }
+
+  // 在所有初始化完成后执行
+  initDashboard();
+
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -156,15 +223,31 @@
     '算法训练资源组', '日志采集资源组'
   ];
 
-  // 资源组标签：用来把多个资源组标记成一组，便于筛选与展示。
-  // 一个资源组对应 1 个标签（可为空），一个标签可对应多个资源组。
+  /* ---------- 资源组标签：归属在结算单元下 ---------- */
+  // 资源组标签用来把多个资源组标记成一组，便于筛选与展示。
+  // 标签归属在某个结算单元下（以结算单元名称关联），不同结算单元下的标签可以重名；
+  // 一个资源组对应 1 个标签（可为空），且只能选择其所属结算单元下的标签。
   var RG_TAG_NAMES = [
     'AI大模型', 'Web服务', '大数据', '容器', '存储', '网关', '数据库',
     '中间件', '离线计算', '在线服务', '日志采集', '算法训练',
     '测试', '生产', '预发', '灰度', '安全合规', '交付支持', '客户成功'
   ];
-  var rgTagSeq = RG_TAG_NAMES.length + 1;
-  var rgTags = RG_TAG_NAMES.map(function (name, i) { return { id: i + 1, name: name }; });
+  // 各结算单元共有的通用标签（构造跨结算单元重名场景）
+  var RG_TAG_COMMON = ['测试', '生产', '大数据'];
+  var rgTagSeq = 1;
+  var rgTags = [];
+
+  // 为某个结算单元初始化一批标签：通用标签 + 按序轮转的特色标签
+  function seedRgTagsOfUnit(unit, ui) {
+    var extras = RG_TAG_NAMES.filter(function (n) { return RG_TAG_COMMON.indexOf(n) < 0; });
+    var names = RG_TAG_COMMON.slice();
+    for (var k = 0; k < 2; k++) {
+      names.push(extras[(ui * 2 + k) % extras.length]);
+    }
+    names.forEach(function (n) {
+      rgTags.push({ id: rgTagSeq++, name: n, unit: unit });
+    });
+  }
 
   function findRgTag(tagId) {
     for (var i = 0; i < rgTags.length; i++) {
@@ -176,20 +259,37 @@
     var t = findRgTag(tagId);
     return t ? t.name : null;
   }
-  // 标签名 → 标签 id；不存在则自动创建（用于初始推断）
-  function rgTagIdOf(name) {
-    for (var i = 0; i < rgTags.length; i++) {
-      if (rgTags[i].name === name) return rgTags[i].id;
-    }
-    var id = rgTagSeq++;
-    rgTags.push({ id: id, name: name });
-    return id;
+  // 某结算单元下的全部标签
+  function rgTagsOfUnit(unit) {
+    if (!unit) return [];
+    return rgTags.filter(function (t) { return t.unit === unit; });
+  }
+  // 当前已拥有标签的结算单元（去重、排序），用于抽屉筛选与批量分组
+  function rgTagUnits() {
+    var seen = Object.create(null);
+    var list = [];
+    rgTags.forEach(function (t) {
+      if (seen[t.unit]) return;
+      seen[t.unit] = true;
+      list.push(t.unit);
+    });
+    return list.sort();
   }
   // 统计某个标签关联的资源组数
   function rgTagCount(tagId) {
     var n = 0;
     GROUPS.forEach(function (g) { if (g.tagId === tagId) n++; });
     return n;
+  }
+  // 构造数据用：在资源组所属结算单元下挑一个标签，取不到按序轮转兜底
+  function pickRgTagId(name, unit, i) {
+    var list = rgTagsOfUnit(unit);
+    if (!list.length) return null;
+    var want = rgTagOf(name, unit, i);
+    for (var j = 0; j < list.length; j++) {
+      if (list[j].name === want) return list[j].id;
+    }
+    return list[i % list.length].id;
   }
 
   // 按名称/所属单元推断唯一标签，取不到再按序轮转兜底
@@ -214,12 +314,22 @@
     var rows = RG_SEED.map(function (r, i) {
       return {
         id: i + 1, name: r[0], gid: r[1], count: r[2], unit: r[3],
-        tagId: rgTagIdOf(rgTagOf(r[0], r[3], i))
+        tagId: null, _noTag: false
       };
     });
 
     var used = Object.create(null);
     rows.forEach(function (r) { used[r.name] = true; });
+
+    // 生成的资源组集中在有限的结算单元内，
+    // 保证「一个标签关联多个资源组」的场景可见，标签总量也可控
+    var unitPool = [];
+    rows.forEach(function (r) {
+      if (unitPool.indexOf(r.unit) < 0) unitPool.push(r.unit);
+    });
+    UNITS.slice(0, 12).forEach(function (u) {
+      if (unitPool.indexOf(u.name) < 0) unitPool.push(u.name);
+    });
 
     var nextId = 6543;
     for (var i = 0; rows.length < 186; i++) {
@@ -229,17 +339,32 @@
       var name = prefix + '-' + suffix + (round === 0 ? '' : round + 1);
       if (used[name]) continue;
       used[name] = true;
-      var unit = UNITS[i % UNITS.length].name;
+      var unit = unitPool[i % unitPool.length];
       rows.push({
         id: rows.length + 1,
         name: name,
         gid: nextId--,
         count: i % 15,
         unit: unit,
+        tagId: null,
         // 构造部分「无标签」资源组，用于验证无标签筛选
-        tagId: (i % 5 === 0) ? null : rgTagIdOf(rgTagOf(name, unit, i))
+        _noTag: i % 5 === 0
       });
     }
+
+    // 为资源组中出现过的结算单元初始化标签，再给资源组挂上本单元下的标签
+    var seenUnit = Object.create(null);
+    var units = [];
+    rows.forEach(function (r) {
+      if (seenUnit[r.unit]) return;
+      seenUnit[r.unit] = true;
+      units.push(r.unit);
+    });
+    units.sort().forEach(seedRgTagsOfUnit);
+    rows.forEach(function (r, k) {
+      r.tagId = r._noTag ? null : pickRgTagId(r.name, r.unit, k);
+      delete r._noTag;
+    });
     return rows;
   }
 
@@ -619,14 +744,22 @@
     rg: {
       key: 'rg',
       entity: '资源组',
-      tip: '资源组标签用于把多个资源组标记为一组，便于筛选与集中展示。' +
+      tip: '资源组标签归属在结算单元下，不同结算单元下的标签可以重名。' +
         '一个资源组只能设置 1 个标签，一个标签可关联多个资源组。',
       maxLen: 12,
+      // 该实体的标签带结算单元维度：抽屉列表展示结算单元列、支持筛选
+      hasUnit: true,
+      unitName: function (unit) { return unit || '-'; },
+      units: rgTagUnits,
       tags: function () { return rgTags; },
       find: findRgTag,
       count: rgTagCount,
-      add: function (name) { rgTags.push({ id: rgTagSeq++, name: name }); },
-      rename: function (id, name) { findRgTag(id).name = name; },
+      add: function (name, unit) { rgTags.push({ id: rgTagSeq++, name: name, unit: unit }); },
+      rename: function (id, name, unit) {
+        var t = findRgTag(id);
+        t.name = name;
+        if (unit != null) t.unit = unit;
+      },
       remove: function (id) {
         GROUPS.forEach(function (g) { if (g.tagId === id) g.tagId = null; });
         rgTags = rgTags.filter(function (t) { return t.id !== id; });
@@ -647,30 +780,40 @@
 
   var tagScope = SCOPES.unit;   // 抽屉/弹框当前作用的实体
   var tagSearchKeyword = '';    // 抽屉内标签名称搜索关键字
+  var tagUnitFilter = '';       // 抽屉内归属结算单元筛选（仅资源组标签）
 
   function tagFilteredTags() {
     var kw = tagSearchKeyword.trim().toLowerCase();
-    if (!kw) return tagScope.tags();
+    var unit = tagScope.hasUnit ? tagUnitFilter : '';
+    if (!kw && !unit) return tagScope.tags();
     return tagScope.tags().filter(function (t) {
-      return t.name.toLowerCase().indexOf(kw) > -1;
+      if (kw && t.name.toLowerCase().indexOf(kw) < 0) return false;
+      if (unit && t.unit !== unit) return false;
+      return true;
     });
   }
 
   function renderTagList() {
     var box = $('tag-list');
+    var withUnit = !!tagScope.hasUnit;
     var list = tagFilteredTags();
+    box.classList.toggle('has-dept', withUnit);
     box.innerHTML = list.map(function (t) {
       var n = tagScope.count(t.id);
+      var unitCell = withUnit
+        ? '<span class="tag-item-dept" title="' + escapeHtml(t.unit || '-') + '">' + escapeHtml(t.unit || '-') + '</span>'
+        : '';
       return '<li class="tag-item" data-id="' + t.id + '">' +
-        '<span class="tag-chip">' + escapeHtml(t.name) + '</span>' +
+        '<span class="tag-item-name"><span class="tag-chip">' + escapeHtml(t.name) + '</span></span>' +
+        unitCell +
         '<span class="tag-item-count" data-act="count" title="筛选关联的' + tagScope.entity + '">' + n + ' 个</span>' +
         '<div class="tag-item-ops">' +
         '<button class="btn-link" data-act="edit" type="button">编辑</button>' +
         '<button class="btn-link danger" data-act="remove" type="button">移除</button>' +
         '</div></li>';
     }).join('');
-    // 有关键字时提示「无匹配标签」，无关键字时提示「暂无标签」
-    $('tag-list-empty').textContent = tagSearchKeyword.trim()
+    // 有筛选条件时提示「无匹配标签」，无条件时提示「暂无标签」
+    $('tag-list-empty').textContent = (tagSearchKeyword.trim() || (tagScope.hasUnit && tagUnitFilter))
       ? '无匹配标签'
       : '暂无标签，请先添加';
     $('tag-list-empty').hidden = list.length > 0;
@@ -682,24 +825,33 @@
     tagScope.refresh();
   }
 
-  function tagNameError(name, exceptId) {
-    var list = tagScope.tags();
-    if (!name) return '请输入标签名称';
-    if (name.length > tagScope.maxLen) return '标签名称不超过 ' + tagScope.maxLen + ' 个字符';
-    for (var i = 0; i < list.length; i++) {
-      if (list[i].name === name && list[i].id !== exceptId) return '标签名称已存在';
-    }
-    return '';
-  }
-
   function openDrawer(scope) {
     tagScope = scope;
     tagSearchKeyword = '';
+    tagUnitFilter = '';
     $('tag-search-input').value = '';
     $('tag-drawer-title').textContent = scope.entity + '标签管理';
     $('tag-drawer-tip').textContent = scope.tip;
     $('tag-list-head-right').textContent = '关联' + scope.entity;
     $('tag-list-empty').textContent = '暂无标签，请先添加';
+
+    // 结算单元筛选下拉：仅对资源组标签显示
+    var unitRow = $('tag-dept-filter-row');
+    var unitSel = $('tag-dept-filter');
+    var headUnit = $('tag-list-head-dept');
+    if (scope.hasUnit) {
+      unitSel.innerHTML = '<option value="">全部结算单元</option>' +
+        scope.units().map(function (u) {
+          return '<option value="' + escapeHtml(u) + '">' + escapeHtml(u) + '</option>';
+        }).join('');
+      unitSel.value = '';
+      unitRow.hidden = false;
+      headUnit.hidden = false;
+    } else {
+      unitRow.hidden = true;
+      headUnit.hidden = true;
+    }
+
     renderTagList();
     $('tag-mask').hidden = false;
     $('tag-drawer').hidden = false;
@@ -726,6 +878,13 @@
     }
   });
 
+  // 标签管理抽屉：按归属结算单元筛选（仅资源组标签）
+  $('tag-dept-filter').addEventListener('change', function () {
+    tagUnitFilter = this.value;
+    this.classList.toggle('placeholder', !this.value);
+    renderTagList();
+  });
+
   /* ---------- 标签名称弹窗：添加 / 编辑共用 ---------- */
   var tagNameMode = 'add';      // 'add' | 'edit'
   var tagNameEditId = null;     // 编辑时的标签 id
@@ -735,14 +894,40 @@
     $('tag-name-error').hidden = !msg;
   }
 
+  // 填充结算单元选择下拉（仅资源组标签弹窗）
+  function fillTagNameUnitOptions(selectedUnit) {
+    var unitRow = $('tag-name-dept-row');
+    var sel = $('tag-name-dept');
+    if (tagScope.hasUnit) {
+      sel.innerHTML = '<option value="">请选择归属结算单元</option>' +
+        tagScope.units().map(function (u) {
+          return '<option value="' + escapeHtml(u) + '">' + escapeHtml(u) + '</option>';
+        }).join('');
+      sel.value = selectedUnit || '';
+      unitRow.hidden = false;
+    } else {
+      unitRow.hidden = true;
+    }
+  }
+
   function openTagNameModal(mode, id) {
     tagNameMode = mode;
     tagNameEditId = id;
     showTagNameError('');
+    $('tag-name-dept-error').textContent = '';
+    $('tag-name-dept-error').hidden = true;
     $('tag-name-title').textContent = mode === 'edit' ? '编辑标签' : '添加标签';
     var input = $('tag-name-input');
     input.maxLength = tagScope.maxLen;
-    input.value = mode === 'edit' && id ? (tagScope.find(id) ? tagScope.find(id).name : '') : '';
+    var editUnit = null;
+    if (mode === 'edit' && id) {
+      var t = tagScope.find(id);
+      input.value = t ? t.name : '';
+      editUnit = t ? (t.unit || null) : null;
+    } else {
+      input.value = '';
+    }
+    fillTagNameUnitOptions(editUnit);
     $('tag-name-mask').hidden = false;
     setTimeout(function () { input.focus(); if (mode === 'edit') input.select(); }, 0);
   }
@@ -751,18 +936,41 @@
     $('tag-name-mask').hidden = true;
   }
 
+  function tagNameError(name, unit, exceptId) {
+    var list = tagScope.tags();
+    if (!name) return '请输入标签名称';
+    if (name.length > tagScope.maxLen) return '标签名称不超过 ' + tagScope.maxLen + ' 个字符';
+    // 同结算单元内名称唯一；不同结算单元允许重名
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].name === name && list[i].id !== exceptId) {
+        if (!tagScope.hasUnit) return '标签名称已存在';
+        if (unit && list[i].unit === unit) return '该结算单元下标签名称已存在';
+      }
+    }
+    return '';
+  }
+
   function submitTagName() {
     var input = $('tag-name-input');
     var name = input.value.trim();
-    var err = tagNameError(name, tagNameMode === 'edit' ? tagNameEditId : null);
+    var unit = tagScope.hasUnit ? ($('tag-name-dept').value || null) : null;
+
+    // 带结算单元维度时，结算单元必填
+    if (tagScope.hasUnit && !unit) {
+      $('tag-name-dept-error').textContent = '请选择归属结算单元';
+      $('tag-name-dept-error').hidden = false;
+      return;
+    }
+    var err = tagNameError(name, unit, tagNameMode === 'edit' ? tagNameEditId : null);
     if (err) { showTagNameError(err); return; }
+
     if (tagNameMode === 'edit') {
-      tagScope.rename(tagNameEditId, name);
+      tagScope.rename(tagNameEditId, name, unit);
       closeTagNameModal();
       refreshAfterTagChange();
       toast('标签已更新为「' + name + '」');
     } else {
-      tagScope.add(name);
+      tagScope.add(name, unit);
       closeTagNameModal();
       refreshAfterTagChange();
       toast('标签「' + name + '」已添加');
@@ -847,9 +1055,23 @@
     $('batch-entity').textContent = scope.entity;
     $('batch-clear-entity').textContent = scope.entity;
     var sel = $('batch-tag-select');
-    sel.innerHTML = '<option value="">请选择标签</option>' + scope.tags().map(function (t) {
-      return '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
-    }).join('');
+    // 资源组标签按结算单元分组，避免重名混淆
+    if (scope.hasUnit) {
+      var grouped = '';
+      scope.units().forEach(function (u) {
+        var uTags = scope.tags().filter(function (t) { return t.unit === u; });
+        if (!uTags.length) return;
+        grouped += '<optgroup label="' + escapeHtml(u) + '">' +
+          uTags.map(function (t) {
+            return '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
+          }).join('') + '</optgroup>';
+      });
+      sel.innerHTML = '<option value="">请选择标签</option>' + grouped;
+    } else {
+      sel.innerHTML = '<option value="">请选择标签</option>' + scope.tags().map(function (t) {
+        return '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
+      }).join('');
+    }
     sel.value = '';
     sel.disabled = false;
     $('batch-clear-tag').checked = false;
@@ -947,7 +1169,12 @@
     tagBox: 'rg-tag-dropdown',
     tagClear: 'rg-tag-clear',
     // 标签可增删改，选项每次展开时实时读取
-    tagOptions: function () { return rgTags; },
+    // 资源组标签带结算单元前缀以区分重名，格式：「结算单元·标签名」
+    tagOptions: function () {
+      return rgTags.map(function (t) {
+        return { id: t.id, name: t.unit ? t.unit + ' · ' + t.name : t.name };
+      });
+    },
     // 支持资源组 ID 或名称搜索
     match: function (r, kw) {
       return r.name.toLowerCase().indexOf(kw) > -1 || String(r.gid).indexOf(kw) > -1;
@@ -1025,7 +1252,7 @@
 
   /* ---------- 资源组：创建 / 编辑 ---------- */
   // 结算单元下拉选项：取结算单元数据去重后排序
-  function fillRgFormUnitOptions() {
+  function fillRgFormUnitOptions(selectedUnit) {
     var names = [];
     UNITS.forEach(function (u) {
       if (names.indexOf(u.name) < 0) names.push(u.name);
@@ -1035,14 +1262,26 @@
       names.map(function (n) {
         return '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>';
       }).join('');
+    $('rg-form-unit').value = selectedUnit || '';
   }
-  fillRgFormUnitOptions();
+  fillRgFormUnitOptions(null);
 
-  function fillRgFormTagOptions() {
+  // 根据所选结算单元，过滤出该结算单元下的标签选项
+  // unit 为空时标签下拉不可用（需先选择结算单元）
+  function fillRgFormTagOptions(unit, selectedTagId) {
+    var list = unit ? rgTagsOfUnit(unit) : [];
     $('rg-form-tag').innerHTML = '<option value="">请选择标签（非必填）</option>' +
-      rgTags.map(function (t) {
+      list.map(function (t) {
         return '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
       }).join('');
+    $('rg-form-tag').disabled = !unit;
+    var value = '';
+    if (unit && selectedTagId != null) {
+      // 仅当原标签仍归属在所选结算单元下时保留，否则清空
+      var exists = list.some(function (t) { return String(t.id) === String(selectedTagId); });
+      value = exists ? String(selectedTagId) : '';
+    }
+    $('rg-form-tag').value = value;
   }
 
   var rgEditingId = null; // 正在编辑的资源组 id，null 表示新建
@@ -1060,16 +1299,23 @@
 
   function openRgForm(id) {
     rgEditingId = id;
-    fillRgFormTagOptions();
     showRgFormNameError('');
     showRgFormUnitError('');
     $('rg-form-title').textContent = id ? '编辑资源组' : '创建资源组';
     var row = id ? findGroupById(id) : null;
+
     $('rg-form-name').value = row ? row.name : '';
-    $('rg-form-unit').value = row ? row.unit : '';
-    $('rg-form-tag').value = row && row.tagId != null ? String(row.tagId) : '';
+    fillRgFormUnitOptions(row ? row.unit : null);
+    fillRgFormTagOptions(row ? row.unit : null, row ? row.tagId : null);
     $('rg-form-mask').hidden = false;
   }
+
+  // 选择结算单元后：标签联动过滤，并清空已选标签
+  $('rg-form-unit').addEventListener('change', function () {
+    showRgFormUnitError('');
+    fillRgFormTagOptions(this.value, null);
+  });
+
   function closeRgForm() {
     $('rg-form-mask').hidden = true;
     rgEditingId = null;
@@ -1089,7 +1335,6 @@
     if (e.target === $('rg-form-mask')) closeRgForm();
   });
   $('rg-form-name').addEventListener('input', function () { showRgFormNameError(''); });
-  $('rg-form-unit').addEventListener('change', function () { showRgFormUnitError(''); });
 
   // 行内「编辑」链接
   $('rg-table-body').addEventListener('click', function (e) {
@@ -1119,6 +1364,11 @@
     }
 
     var tagId = tagVal ? parseInt(tagVal, 10) : null;
+    // 防御：标签必须归属在所选结算单元下
+    if (tagId && (!findRgTag(tagId) || findRgTag(tagId).unit !== unit)) {
+      tagId = null;
+    }
+
     if (rgEditingId) {
       var row = findGroupById(rgEditingId);
       row.name = name;
