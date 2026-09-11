@@ -188,6 +188,8 @@
                 </div>
               </div>
 
+              <!-- 内容容器：包裹各 Tab 面板 -->
+              <div class="dash-res-scroll-inner">
               <!-- Tab 面板：资源概览 -->
               <div class="dash-pane" data-pane="res" data-layout="h">
                 <!-- 分类筛选（横向方案吸顶 / 纵向方案左侧竖排） -->
@@ -239,11 +241,13 @@
                         以下为当前账号<strong>待开通</strong>的产品，可单个开通或前往批量开通
                       </div>
                     </div>
-                    <!-- 产品卡片（由 app.js 按分类渲染） -->
-                    <div class="dash-more-grid" id="dash-more-grid"></div>
+                    <!-- 产品卡片（由 app.js 按分类分组渲染，分类=全部时同资源概览分组逻辑） -->
+                    <div class="dash-more-body" id="dash-more-body"></div>
+                    <div class="dash-res-foot" id="dash-more-foot"></div>
                   </div>
                 </div>
               </div>
+              </div><!-- /.dash-res-scroll-inner -->
             </section>
           </div>
 

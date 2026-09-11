@@ -374,6 +374,35 @@
 
     stampNow();
     renderAll();
+
+    /* 响应「开通成功」跳转事件，刷新并高亮新产品 */
+    document.addEventListener('res-refresh-needed', function (e) {
+      var hlName = e.detail && e.detail.highlight;
+      // 重置到全部分类
+      state.cat = '全部';
+      state.keyword = '';
+      state.expanded = true;
+      state.collapsedGroups = {};
+      renderAll();
+
+      if (!hlName) return;
+      // 等 DOM 更新后找到对应卡片并高亮
+      setTimeout(function () {
+        var cards = body.querySelectorAll('.dash-res-card2');
+        for (var i = 0; i < cards.length; i++) {
+          var nameText = cards[i].querySelector('.dash-res-card2-name-text');
+          if (nameText && nameText.textContent.trim() === hlName) {
+            cards[i].classList.add('res-card-highlight');
+            cards[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // 高亮动画结束后自动移除 class
+            setTimeout(function (el) {
+              el.classList.remove('res-card-highlight');
+            }, 2800, cards[i]);
+            break;
+          }
+        }
+      }, 120);
+    });
   }
 
   /* ==========================================================
@@ -395,14 +424,21 @@
   var ICON_STAR = '<svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M8 2l1.8 3.7 4 .6-2.9 2.8.7 4L8 11.2 4.4 13.1l.7-4L2.2 6.3l4-.6L8 2z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>';
   var ICON_DOC = '<svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M4 2h5.5L12.5 5v9H4V2z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/><path d="M6 7.5h4.5M6 10h4.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>';
 
+  /* 更多产品：分类顺序（排除「推荐」及无数据分类） */
+  var MORE_CAT_ORDER = ['计算', '存储', '数据库', '视频云', 'Serverless', 'API市场', 'AI开发', '智能体', '数智应用', '物联网'];
+
   function initMoreProducts() {
     var tabsBox = $('dash-more-tabs');
-    var grid = $('dash-more-grid');
+    var body = $('dash-more-body');
+    var footBox = $('dash-more-foot');
     var searchInput = $('dash-more-search');
-    if (!tabsBox || !grid) return;
+    if (!tabsBox || !body) return;
 
     var current = '全部';
     var keyword = '';
+    var expanded = false;
+    var collapsedGroups = {};
+    var MORE_COLLAPSED_LIMIT = 5;
 
     function match(p) {
       if (current !== '全部') {
@@ -432,17 +468,73 @@
         '</a>';
     }
 
+    /* 分类分组（复用资源概览的分组 HTML 结构） */
+    function moreGroupHtml(cat, items) {
+      var collapsed = !!collapsedGroups[cat];
+      var shown = items;
+      if (!collapsed && !expanded && current === '全部' && items.length > MORE_COLLAPSED_LIMIT) {
+        shown = items.slice(0, MORE_COLLAPSED_LIMIT);
+      }
+      var more = items.length - shown.length;
+      return '<div class="dash-res-group" data-group="' + escapeHtml(cat) + '">' +
+        '<div class="dash-res-group-hd">' +
+        '<span class="dash-group-name">' + escapeHtml(cat) +
+        '<span class="dash-cat-badge">' + items.length + '</span></span>' +
+        '<button type="button" class="dash-group-toggle' + (collapsed ? ' collapsed' : '') +
+        '" data-group-toggle="' + escapeHtml(cat) + '">' + (collapsed ? '展开' : '收起') + ICON_COLLAPSE + '</button>' +
+        '</div>' +
+        (collapsed ? '' : '<div class="dash-more-grid">' + shown.map(moreCardHtml).join('') + '</div>' +
+          (more > 0 ? '<div class="dash-res-foot"><span class="dash-res-updated">该分类还有 ' + more + ' 项，点击下方「展开全部」查看</span></div>' : '')) +
+        '</div>';
+    }
+
     function render() {
       var list = MORE_PRODUCTS.filter(match);
-      grid.innerHTML = list.length
-        ? list.map(moreCardHtml).join('')
-        : '<div class="dash-res-empty dash-more-empty">该分类下暂无待开通产品</div>';
+
+      if (!list.length) {
+        body.innerHTML = '<div class="dash-res-empty dash-more-empty">该分类下暂无待开通产品</div>';
+        if (footBox) footBox.innerHTML = '';
+        return;
+      }
+
+      if (current === '全部') {
+        // 按分类分组，逻辑同资源概览模块
+        var html = '';
+        MORE_CAT_ORDER.forEach(function (c) {
+          var items = list.filter(function (p) { return p.cat === c; });
+          if (items.length) html += moreGroupHtml(c, items);
+        });
+        body.innerHTML = html;
+      } else {
+        // 非全部：平铺所有卡片
+        body.innerHTML = '<div class="dash-more-grid">' + list.map(moreCardHtml).join('') + '</div>';
+      }
+
+      // footer：仅在「全部」且存在被折叠的条目时显示展开/收起按钮
+      if (footBox) {
+        var hidden = 0;
+        if (current === '全部' && !expanded) {
+          MORE_CAT_ORDER.forEach(function (c) {
+            if (collapsedGroups[c]) return;
+            var n = list.filter(function (p) { return p.cat === c; }).length;
+            if (n > MORE_COLLAPSED_LIMIT) hidden += n - MORE_COLLAPSED_LIMIT;
+          });
+        }
+        if (current === '全部' && (hidden > 0 || expanded)) {
+          footBox.innerHTML = '<button type="button" class="dash-res-foot-btn' + (expanded ? ' expanded' : '') +
+            '" id="dash-more-expand">' + (expanded ? '收起' : '展开全部（还有 ' + hidden + ' 项）') + ICON_COLLAPSE + '</button>';
+        } else {
+          footBox.innerHTML = '';
+        }
+      }
     }
 
     tabsBox.addEventListener('click', function (e) {
       var btn = e.target.closest('.dash-tab');
       if (!btn) return;
       current = btn.getAttribute('data-cat') || '全部';
+      expanded = false;
+      collapsedGroups = {};
       tabsBox.querySelectorAll('.dash-tab').forEach(function (t) {
         var on = t === btn;
         t.classList.toggle('active', on);
@@ -451,18 +543,117 @@
       render();
     });
 
+    /* 分组折叠按钮点击 */
+    body.addEventListener('click', function (e) {
+      var tg = e.target.closest('[data-group-toggle]');
+      if (tg) {
+        var g = tg.getAttribute('data-group-toggle');
+        collapsedGroups[g] = !collapsedGroups[g];
+        render();
+        return;
+      }
+      
+      /* 立即开通按钮点击 */
+      var openBtn = e.target.closest('.dash-more-open');
+      if (openBtn) {
+        var card = openBtn.closest('.dash-more-card');
+        if (card) {
+          var nameEl = card.querySelector('.dash-more-name');
+          var productName = nameEl ? nameEl.textContent.trim() : '';
+          if (productName) {
+            handleProductOpen(productName);
+          }
+        }
+      }
+    });
+
+    /* 展开/收起全部 */
+    if (footBox) {
+      footBox.addEventListener('click', function (e) {
+        if (e.target.closest('#dash-more-expand')) {
+          expanded = !expanded;
+          render();
+        }
+      });
+    }
+
     if (searchInput) {
-      // 仅在回车时触发搜索，不做实时搜索
+      // 仅在回车时触发搜索，不做实时搜索；搜索时自动展开
       searchInput.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
           e.preventDefault();
           keyword = searchInput.value;
+          expanded = true;
+          collapsedGroups = {};
           render();
         }
       });
     }
 
     render();
+  }
+
+  /* ==========================================================
+     立即开通：toast 提示 + 跳转资源概览高亮
+     ========================================================== */
+  function handleProductOpen(productName) {
+    // 1. 将产品添加到资源概览数据（找到对应的 MORE_PRODUCTS 条目）
+    var mp = null;
+    for (var i = 0; i < MORE_PRODUCTS.length; i++) {
+      if (MORE_PRODUCTS[i].name === productName) { mp = MORE_PRODUCTS[i]; break; }
+    }
+    // 检查是否已在资源概览中
+    var alreadyInRes = false;
+    for (var j = 0; j < RES_PRODUCTS.length; j++) {
+      if (RES_PRODUCTS[j].name === productName) { alreadyInRes = true; break; }
+    }
+    if (!alreadyInRes && mp) {
+      RES_PRODUCTS.push({
+        name: mp.name,
+        abbr: mp.name.replace(/^.*?\s/, '').slice(0, 3).toUpperCase(),
+        cat: mp.cat,
+        count: 0,
+        unit: '个',
+        desc: mp.desc
+      });
+    }
+
+    // 2. Toast 提示
+    toast('开通成功');
+
+    // 3. 切换到资源概览 tab
+    var paneTabs = $('dash-pane-tabs');
+    var section = document.getElementById('dash-res-section');
+    if (paneTabs && section) {
+      paneTabs.querySelectorAll('.dash-pane-tab').forEach(function (t) {
+        var on = t.getAttribute('data-pane') === 'res';
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      section.querySelectorAll('.dash-pane').forEach(function (p) {
+        p.hidden = p.getAttribute('data-pane') !== 'res';
+      });
+      section.querySelectorAll('[data-pane-actions]').forEach(function (a) {
+        a.hidden = a.getAttribute('data-pane-actions') !== 'res';
+      });
+    }
+
+    // 4. 重置资源概览状态到「全部」并重新渲染（含新产品）
+    var resBody = $('dash-res-body');
+    var resCats = $('dash-res-cats');
+    var resfoot = $('dash-res-foot');
+    var resTip  = $('dash-res-tip');
+
+    // 重新执行渲染（复用全局已初始化的渲染函数）
+    // 通过触发一个自定义事件通知资源概览模块刷新
+    document.dispatchEvent(new CustomEvent('res-refresh-needed', { detail: { highlight: productName } }));
+
+    // 5. 滚动到资源概览区域
+    if (section) {
+      setTimeout(function () {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    }
   }
 
   /* ==========================================================
@@ -522,12 +713,17 @@
       var btn = e.target.closest('.dash-scheme-btn');
       if (!btn) return;
       var scheme = btn.getAttribute('data-scheme') || 'h';
+
       // 同步更多产品区和资源概览区的布局属性
       wrap.setAttribute('data-layout', scheme);
       var morePane = document.querySelector('.dash-pane[data-pane="more"]');
       if (morePane) morePane.setAttribute('data-layout', scheme);
       var resPane = document.querySelector('.dash-pane[data-pane="res"]');
       if (resPane) resPane.setAttribute('data-layout', scheme);
+
+      // 在外层页面容器上标记当前方案
+      dashPage.setAttribute('data-scheme', scheme);
+
       box.querySelectorAll('.dash-scheme-btn').forEach(function (b) {
         b.classList.toggle('active', b === btn);
       });
