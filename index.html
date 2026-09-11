@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>结算单元 - 访问控制 - 360智汇云</title>
-  <link rel="stylesheet" href="shared/base.css?v=20260910c">
-  <link rel="stylesheet" href="styles.css?v=20260910c">
+  <link rel="stylesheet" href="shared/base.css?v=20260911a">
+  <link rel="stylesheet" href="styles.css?v=20260911d">
 </head>
 
 <body>
@@ -59,40 +59,53 @@
 
     <!-- ============ 工作台总览页 ============ -->
     <div class="dashboard-page" id="dashboard-page" hidden>
+      <div class="dash-hero" aria-hidden="true"></div>
+
+      <!-- 方案切换悬浮框 -->
+      <div class="dash-scheme-switch" id="dash-scheme-switch" role="group" aria-label="分类布局方案切换">
+        <div class="dash-scheme-hd">
+          <svg viewBox="0 0 16 16" fill="none" width="13" height="13" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M6 2v12" stroke="currentColor" stroke-width="1.2"/></svg>
+          <span>分类布局方案</span>
+        </div>
+        <button type="button" class="dash-scheme-btn active" data-scheme="h">
+          <span class="dash-scheme-name">方案1 · 横向吸顶</span>
+          <span class="dash-scheme-desc">分类横排，滚动时吸顶</span>
+        </button>
+        <button type="button" class="dash-scheme-btn" data-scheme="v">
+          <span class="dash-scheme-name">方案2 · 纵向分类</span>
+          <span class="dash-scheme-desc">分类左侧竖排，卡片右侧</span>
+        </button>
+      </div>
       <div class="dashboard-body">
         <!-- 顶部功能导航 -->
-        <div class="dash-nav-bar">
-          <a class="dash-nav-item" href="#">
-            <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 13.5c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-            成员&amp;组织
-          </a>
-          <a class="dash-nav-item" href="#">
-            <svg viewBox="0 0 16 16" fill="none"><rect x="2.2" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2"/><rect x="6.7" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2"/><rect x="11.2" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2"/></svg>
-            资源组管理
-          </a>
-          <a class="dash-nav-item" href="#">
-            <svg viewBox="0 0 16 16" fill="none"><rect x="2.2" y="2.5" width="11.6" height="3.4" rx="0.8" stroke="currentColor" stroke-width="1.2"/><rect x="2.2" y="7.2" width="11.6" height="3.4" rx="0.8" stroke="currentColor" stroke-width="1.2"/><path d="M2.2 13h11.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-            权限管理
-          </a>
-          <a class="dash-nav-item" href="#">
-            <svg viewBox="0 0 16 16" fill="none"><circle cx="5.4" cy="10.6" r="2.9" stroke="currentColor" stroke-width="1.2"/><path d="M7.5 8.5l5.6-5.6M10.4 5.6l1.5 1.5M12 4l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-            密钥管理
-          </a>
-          <a class="dash-nav-item" href="#">
-            <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.8" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3.5h2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-            问题反馈
-          </a>
-        </div>
-
-        <!-- 产品搜索 -->
-        <div class="dash-search-wrap">
-          <div class="dash-search-box">
-            <svg class="dash-search-ico" viewBox="0 0 16 16" fill="none">
-              <circle cx="7" cy="7" r="4.6" stroke="currentColor" stroke-width="1.3"/>
-              <path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            </svg>
-            <input type="text" class="dash-search-input" placeholder="产品名称搜索" aria-label="产品名称搜索">
+        <div class="dash-nav-row">
+          <div class="dash-nav-bar">
+            <a class="dash-nav-item" href="#">
+              <svg class="dash-nav-ico" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 13.5c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              <span>成员&amp;组织</span>
+              <svg class="dash-nav-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a class="dash-nav-item" href="#">
+              <svg class="dash-nav-ico" viewBox="0 0 16 16" fill="none"><rect x="2.2" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2"/><rect x="6.7" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2"/><rect x="11.2" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2"/></svg>
+              <span>资源组管理</span>
+              <svg class="dash-nav-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a class="dash-nav-item" href="#">
+              <svg class="dash-nav-ico" viewBox="0 0 16 16" fill="none"><rect x="2.2" y="2.5" width="11.6" height="3.4" rx="0.8" stroke="currentColor" stroke-width="1.2"/><rect x="2.2" y="7.2" width="11.6" height="3.4" rx="0.8" stroke="currentColor" stroke-width="1.2"/><path d="M2.2 13h11.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              <span>权限管理</span>
+              <svg class="dash-nav-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a class="dash-nav-item" href="#">
+              <svg class="dash-nav-ico" viewBox="0 0 16 16" fill="none"><circle cx="5.4" cy="10.6" r="2.9" stroke="currentColor" stroke-width="1.2"/><path d="M7.5 8.5l5.6-5.6M10.4 5.6l1.5 1.5M12 4l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              <span>密钥管理</span>
+              <svg class="dash-nav-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
           </div>
+          <a class="dash-nav-item dash-nav-feedback" href="#">
+            <svg class="dash-nav-ico" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.8" stroke="currentColor" stroke-width="1.2"/><path d="M6.4 6.2a1.7 1.7 0 113 1.1c-.5.5-.9.8-.9 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="11" r="0.6" fill="currentColor"/></svg>
+            <span>问题反馈</span>
+            <svg class="dash-nav-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
         </div>
 
         <div class="dash-two-col">
@@ -140,130 +153,96 @@
               </div>
             </section>
 
-            <!-- 资源概览 -->
-            <section class="dash-section">
-              <h2 class="dash-section-title">资源概览</h2>
-              <div class="dash-resource-tabs">
-                <button class="dash-tab active" type="button">全部</button>
-                <button class="dash-tab" type="button">Serverless</button>
-                <button class="dash-tab" type="button">API市场</button>
-                <button class="dash-tab" type="button">AI开发</button>
-                <button class="dash-tab" type="button">智能体</button>
-                <button class="dash-tab" type="button">存储</button>
-                <button class="dash-tab" type="button">计算</button>
-                <button class="dash-tab" type="button">数据库</button>
-                <button class="dash-tab" type="button">视频云</button>
-                <button class="dash-tab" type="button">数智应用</button>
-                <button class="dash-tab" type="button">物联网</button>
+            <!-- 产品与资源：资源概览 / 更多产品 两个 Tab（数据驱动，由 app.js 渲染） -->
+            <section class="dash-section dash-res-section" id="dash-res-section">
+              <div class="dash-res-head">
+                <!-- 一级 Tab -->
+                <div class="dash-pane-tabs" id="dash-pane-tabs" role="tablist" aria-label="产品与资源">
+                  <button type="button" class="dash-pane-tab active" role="tab" aria-selected="true" data-pane="res">资源概览</button>
+                  <button type="button" class="dash-pane-tab" role="tab" aria-selected="false" data-pane="more">更多产品</button>
+                </div>
+                <div class="dash-res-head-right">
+                  <!-- 资源概览专属操作 -->
+                  <div class="dash-pane-actions" data-pane-actions="res">
+                    <div class="dash-res-search">
+                      <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><circle cx="7" cy="7" r="4.6" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                      <input type="text" id="dash-res-search" placeholder="产品名称搜索" aria-label="产品名称搜索">
+                    </div>
+                    <div class="dash-view-toggle" role="group" aria-label="视图切换">
+                      <button type="button" class="dash-view-btn active" data-view="card" title="卡片视图" aria-label="卡片视图">
+                        <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+                      </button>
+                      <button type="button" class="dash-view-btn" data-view="list" title="列表视图" aria-label="列表视图">
+                        <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M5.5 4h8.5M5.5 8h8.5M5.5 12h8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="2.6" cy="4" r="0.9" fill="currentColor"/><circle cx="2.6" cy="8" r="0.9" fill="currentColor"/><circle cx="2.6" cy="12" r="0.9" fill="currentColor"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <!-- 更多产品专属操作 -->
+                  <div class="dash-pane-actions" data-pane-actions="more" hidden>
+                    <div class="dash-res-search">
+                      <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><circle cx="7" cy="7" r="4.6" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                      <input type="text" id="dash-more-search" placeholder="产品名称搜索" aria-label="产品名称搜索">
+                    </div>
+                    <a class="dash-open-link" href="#">批量开通 &gt;</a>
+                  </div>
+                </div>
               </div>
-              <div class="dash-resource-grid">
-                <a class="dash-res-card" href="#">
-                  <div class="dash-res-card-inner">
-                    <div class="dash-res-thumb dash-res-thumb-sms"></div>
-                    <div class="dash-res-info">
-                      <div class="dash-res-name">云短信 SMS <svg viewBox="0 0 12 12" fill="none" width="10" height="10"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                      <div class="dash-res-count"><span class="dash-res-num">7</span> 个通道</div>
-                    </div>
-                  </div>
-                </a>
-                <a class="dash-res-card" href="#">
-                  <div class="dash-res-card-inner">
-                    <div class="dash-res-thumb dash-res-thumb-cdn"></div>
-                    <div class="dash-res-info">
-                      <div class="dash-res-name">内容分发网络 CDN <svg viewBox="0 0 12 12" fill="none" width="10" height="10"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                      <div class="dash-res-count"><span class="dash-res-num">0</span> 个域名</div>
-                    </div>
-                  </div>
-                </a>
-                <a class="dash-res-card" href="#">
-                  <div class="dash-res-card-inner">
-                    <div class="dash-res-thumb dash-res-thumb-aimi"></div>
-                    <div class="dash-res-info">
-                      <div class="dash-res-name">智能体交互 AIMI <svg viewBox="0 0 12 12" fill="none" width="10" height="10"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                      <div class="dash-res-count"><span class="dash-res-num">0</span> 个资源</div>
-                    </div>
-                  </div>
-                </a>
-                <a class="dash-res-card" href="#">
-                  <div class="dash-res-card-inner">
-                    <div class="dash-res-thumb dash-res-thumb-mpc"></div>
-                    <div class="dash-res-info">
-                      <div class="dash-res-name">媒体处理 MPC <svg viewBox="0 0 12 12" fill="none" width="10" height="10"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                      <div class="dash-res-count"><span class="dash-res-num">0</span> 个资源</div>
-                    </div>
-                  </div>
-                </a>
-                <a class="dash-res-card dash-res-card-plain" href="#">
-                  <div class="dash-res-card-inner">
-                    <div class="dash-res-thumb dash-res-thumb-iot"></div>
-                    <div class="dash-res-info">
-                      <div class="dash-res-name">生活物联网 LifeIOT <svg viewBox="0 0 12 12" fill="none" width="10" height="10"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                      <div class="dash-res-desc">针对消费级智能设备的物联网平台</div>
-                    </div>
-                  </div>
-                </a>
-              </div>
-            </section>
 
-            <!-- 更多产品 -->
-            <section class="dash-section">
-              <h2 class="dash-section-title">更多产品</h2>
-              <div class="dash-resource-tabs">
-                <button class="dash-tab active" type="button">全部</button>
-                <button class="dash-tab" type="button">推荐</button>
-                <button class="dash-tab" type="button">Serverless</button>
-                <button class="dash-tab" type="button">API市场</button>
-                <button class="dash-tab" type="button">AI开发</button>
-                <button class="dash-tab" type="button">智能体</button>
-                <button class="dash-tab" type="button">存储</button>
-                <button class="dash-tab" type="button">计算</button>
-                <button class="dash-tab" type="button">数据库</button>
-                <button class="dash-tab" type="button">视频云</button>
-                <button class="dash-tab" type="button">数智应用</button>
-                <button class="dash-tab" type="button">物联网</button>
+              <!-- Tab 面板：资源概览 -->
+              <div class="dash-pane" data-pane="res" data-layout="h">
+                <!-- 分类筛选（横向方案吸顶 / 纵向方案左侧竖排） -->
+                <div class="dash-res-toolbar">
+                  <div class="dash-res-cats" id="dash-res-cats" role="tablist" aria-label="资源分类"></div>
+                </div>
+                <!-- 右侧内容列：提示条 + 分组内容 + 展开收起 -->
+                <div class="dash-res-content-col">
+                  <!-- 已开通产品提示（替代原卡片） -->
+                  <div class="dash-res-tipbar">
+                    <div class="dash-res-tip" id="dash-res-tip"></div>
+                    <div class="dash-res-tip-right">
+                      <span class="dash-res-updated" id="dash-res-updated">数据更新于 09-10 21:43</span>
+                      <button type="button" class="dash-res-refresh" id="dash-res-refresh" title="刷新" aria-label="刷新资源数据">
+                        <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M13 8a5 5 0 11-1.5-3.6M13 2.5v2.8h-2.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <!-- 分组内容 -->
+                  <div class="dash-res-body" id="dash-res-body" data-view="card"></div>
+                  <!-- 展开/收起 -->
+                  <div class="dash-res-foot" id="dash-res-foot"></div>
+                </div>
               </div>
-              <div class="dash-more-label">待开通 <svg viewBox="0 0 14 14" fill="none" width="13" height="13" style="vertical-align:middle;color:var(--text-tertiary)"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="9.5" r="0.6" fill="currentColor"/></svg> <a class="dash-open-link" href="#">批量开通</a></div>
-              <div class="dash-more-grid">
-                <a class="dash-more-card" href="#">
-                  <div class="dash-more-icon dash-more-icon-fc"></div>
-                  <div class="dash-more-info">
-                    <div class="dash-more-name">函数计算 FC</div>
-                    <div class="dash-more-desc">面向函数编程与配置的Serv…</div>
-                    <div class="dash-more-open">立即开通 &gt;</div>
+
+              <!-- Tab 面板：更多产品 -->
+              <div class="dash-pane" data-pane="more" data-layout="h" hidden>
+                <!-- 分类 + 卡片区：容器 data-layout 控制横向(h)/纵向(v)布局 -->
+                <div class="dash-more-wrap" id="dash-more-wrap" data-layout="h">
+                  <div class="dash-resource-tabs" id="dash-more-tabs" role="tablist" aria-label="产品分类">
+                    <button class="dash-tab active" type="button" data-cat="全部">全部</button>
+                    <button class="dash-tab" type="button" data-cat="推荐">推荐</button>
+                    <button class="dash-tab" type="button" data-cat="Serverless">Serverless</button>
+                    <button class="dash-tab" type="button" data-cat="API市场">API市场</button>
+                    <button class="dash-tab" type="button" data-cat="AI开发">AI开发</button>
+                    <button class="dash-tab" type="button" data-cat="智能体">智能体</button>
+                    <button class="dash-tab" type="button" data-cat="存储">存储</button>
+                    <button class="dash-tab" type="button" data-cat="计算">计算</button>
+                    <button class="dash-tab" type="button" data-cat="数据库">数据库</button>
+                    <button class="dash-tab" type="button" data-cat="视频云">视频云</button>
+                    <button class="dash-tab" type="button" data-cat="数智应用">数智应用</button>
+                    <button class="dash-tab" type="button" data-cat="物联网">物联网</button>
                   </div>
-                </a>
-                <a class="dash-more-card" href="#">
-                  <div class="dash-more-icon dash-more-icon-api"></div>
-                  <div class="dash-more-info">
-                    <div class="dash-more-name">API市场 APIMKT</div>
-                    <div class="dash-more-desc">图片、文本、音频、视频等…</div>
-                    <div class="dash-more-open">立即开通 &gt;</div>
+                  <!-- 内容列：提示文案 + 产品卡片（提示文案与分类下方/左侧对齐） -->
+                  <div class="dash-more-content">
+                    <div class="dash-res-tipbar">
+                      <div class="dash-res-tip">
+                        <svg viewBox="0 0 14 14" fill="none" width="13" height="13" aria-hidden="true"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="9.5" r="0.6" fill="currentColor"/></svg>
+                        以下为当前账号<strong>待开通</strong>的产品，可单个开通或前往批量开通
+                      </div>
+                    </div>
+                    <!-- 产品卡片（由 app.js 按分类渲染） -->
+                    <div class="dash-more-grid" id="dash-more-grid"></div>
                   </div>
-                </a>
-                <a class="dash-more-card" href="#">
-                  <div class="dash-more-icon dash-more-icon-mq"></div>
-                  <div class="dash-more-info">
-                    <div class="dash-more-name">消息队列 Pulsar</div>
-                    <div class="dash-more-desc">开源的企业级分布式消息系…</div>
-                    <div class="dash-more-open">立即开通 &gt;</div>
-                  </div>
-                </a>
-                <a class="dash-more-card" href="#">
-                  <div class="dash-more-icon dash-more-icon-pcdn"></div>
-                  <div class="dash-more-info">
-                    <div class="dash-more-name">P2P内容分发 PCDN</div>
-                    <div class="dash-more-desc">利用闲置资源而构建的低成…</div>
-                    <div class="dash-more-open">立即开通 &gt;</div>
-                  </div>
-                </a>
-                <a class="dash-more-card" href="#">
-                  <div class="dash-more-icon dash-more-icon-cm"></div>
-                  <div class="dash-more-info">
-                    <div class="dash-more-name">内容审核 CM</div>
-                    <div class="dash-more-desc">图片审核、文本审核、音…</div>
-                    <div class="dash-more-open">立即开通 &gt;</div>
-                  </div>
-                </a>
+                </div>
               </div>
             </section>
           </div>
@@ -276,7 +255,7 @@
                 <svg viewBox="0 0 24 24" fill="none" width="24" height="24"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
               </div>
               <div class="dash-user-meta">
-                <div class="dash-user-name">wg_zyun_admin</div>
+                <div class="dash-user-name">发卡测试</div>
                 <div class="dash-user-verified">
                   <svg viewBox="0 0 14 14" fill="none" width="13" height="13"><circle cx="7" cy="7" r="6" fill="#52C41A"/><path d="M4 7.2l2 2 4-4.4" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   已实名认证
@@ -284,9 +263,15 @@
               </div>
             </div>
             <div class="dash-user-info-rows">
-              <div class="dash-info-row"><span class="dash-info-label">当前身份：</span><span>3352340661</span><span class="dash-info-tag">主账号</span></div>
-              <div class="dash-info-row"><span class="dash-info-label">当前企业：</span><span>北京世界星辉科技有限责任公司</span></div>
-              <div class="dash-info-row dash-info-row-link"><span class="dash-info-label">登录地址：</span><a href="#" class="dash-info-link">https://console.zyun.360.cn/7261707…</a></div>
+              <div class="dash-info-row"><span class="dash-info-label">当前身份：</span><span>254651187</span><span class="dash-info-tag">主账号</span></div>
+              <div class="dash-info-row"><span class="dash-info-label">当前企业：</span><span>财义（上海）信息科技有限公司</span></div>
+              <div class="dash-info-row dash-info-row-link">
+                <span class="dash-info-label">登录地址：</span>
+                <a href="#" class="dash-info-link">https://console.zyun.360.cn/1194121…</a>
+                <button type="button" class="dash-copy-btn" title="复制登录地址">
+                  <svg viewBox="0 0 14 14" fill="none" width="12" height="12"><rect x="4.5" y="4.5" width="7.5" height="7.5" rx="1.2" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 4.5v-1a1 1 0 00-1-1h-5a1 1 0 00-1 1v5a1 1 0 001 1h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
             </div>
 
             <!-- 费用概览 -->
@@ -301,7 +286,7 @@
               </div>
               <div class="dash-fee-row">
                 <span class="dash-fee-label">本月已消费（¥）</span>
-                <span class="dash-fee-amount">1,205.29</span>
+                <span class="dash-fee-amount">1,503.65</span>
               </div>
             </div>
 
@@ -311,13 +296,46 @@
                 <span class="dash-panel-title">消息通知</span>
                 <a class="dash-panel-link" href="#">消息中心 &gt;</a>
               </div>
-              <ul class="dash-notice-list">
-                <li class="dash-notice-item"><span class="dash-notice-date">12.02</span><span class="dash-notice-text">DeepSeek-V3.2上架API市场</span></li>
-                <li class="dash-notice-item"><span class="dash-notice-date">09.05</span><span class="dash-notice-text">项目开通审核结果</span></li>
-                <li class="dash-notice-item"><span class="dash-notice-date">09.05</span><span class="dash-notice-text">项目开通审核结果</span></li>
-                <li class="dash-notice-item"><span class="dash-notice-date">09.05</span><span class="dash-notice-text">项目开通审核结果</span></li>
-                <li class="dash-notice-item"><span class="dash-notice-date">06.17</span><span class="dash-notice-text">【产品动态】【概览】网络产品新增概览页</span></li>
-              </ul>
+              <div class="dash-notice-empty">
+                <svg viewBox="0 0 64 64" fill="none" width="64" height="64" aria-hidden="true">
+                  <rect x="10" y="18" width="44" height="30" rx="3" stroke="#D8E0E8" stroke-width="2"/>
+                  <path d="M10 21l22 16 22-16" stroke="#D8E0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <p class="dash-notice-empty-title">暂无待处理事项和未读消息</p>
+                <p class="dash-notice-empty-tip">更多消息可在 <a href="#" class="dash-info-link">消息中心</a> 查看</p>
+              </div>
+            </div>
+
+            <!-- 联系并关注我们 -->
+            <div class="dash-panel">
+              <div class="dash-panel-header">
+                <span class="dash-panel-title">联系并关注我们</span>
+              </div>
+              <div class="dash-contact">
+                <div class="dash-contact-qr">
+                  <div class="dash-qr-box">
+                    <svg viewBox="0 0 40 40" fill="none" width="52" height="52" aria-hidden="true">
+                      <rect x="2" y="2" width="12" height="12" rx="1.5" stroke="#202020" stroke-width="2.4"/>
+                      <rect x="26" y="2" width="12" height="12" rx="1.5" stroke="#202020" stroke-width="2.4"/>
+                      <rect x="2" y="26" width="12" height="12" rx="1.5" stroke="#202020" stroke-width="2.4"/>
+                      <rect x="6" y="6" width="4" height="4" fill="#202020"/>
+                      <rect x="30" y="6" width="4" height="4" fill="#202020"/>
+                      <rect x="6" y="30" width="4" height="4" fill="#202020"/>
+                      <rect x="20" y="20" width="4" height="4" fill="#202020"/>
+                      <rect x="28" y="20" width="4" height="4" fill="#202020"/>
+                      <rect x="20" y="28" width="4" height="4" fill="#202020"/>
+                      <rect x="34" y="28" width="4" height="4" fill="#202020"/>
+                      <rect x="28" y="34" width="4" height="4" fill="#202020"/>
+                    </svg>
+                  </div>
+                  <span class="dash-contact-cap">官方微信公众号</span>
+                </div>
+                <div class="dash-contact-lines">
+                  <div class="dash-contact-row"><span class="dash-info-label">售前咨询：</span><span>400-000-0360</span></div>
+                  <div class="dash-contact-row"><span class="dash-info-label">售后支持：</span><a href="#" class="dash-info-link">提交工单</a></div>
+                  <div class="dash-contact-row"><span class="dash-info-label">帮助文档：</span><a href="#" class="dash-info-link">查看文档 &gt;</a></div>
+                </div>
+              </div>
             </div>
           </aside>
         </div>
@@ -970,7 +988,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260910c"></script>
+  <script src="app.js?v=20260910d"></script>
 </body>
 
 </html>

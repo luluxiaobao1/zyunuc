@@ -72,8 +72,504 @@
     });
   }
 
+  /* ==========================================================
+     资源概览模块（数据驱动）
+     - 汇总指标 / 分类筛选 / 搜索 / 仅看有资源 / 卡片-列表视图 / 分组折叠
+     ========================================================== */
+  // desc：产品简介，用于「暂无资源」时替代数字展示
+  var RES_PRODUCTS = [
+    { name: '云服务器 ECS', abbr: 'ECS', cat: '计算', count: 12, unit: '台', desc: '弹性可伸缩的云端计算服务' },
+    { name: '负载均衡 SLB', abbr: 'SLB', cat: '计算', count: 4, unit: '个', desc: '流量分发与高可用保障' },
+    { name: '私有网络 VPC', abbr: 'VPC', cat: '计算', count: 3, unit: '个', desc: '隔离安全的专有网络环境' },
+    { name: '容器引擎 CCE', abbr: 'CCE', cat: '计算', count: 2, unit: '个集群', desc: '高性能容器集群托管服务' },
+    { name: '弹性公网 EIP', abbr: 'EIP', cat: '计算', count: 8, unit: '个', desc: '独立可绑定的公网 IP 资源' },
+    { name: '云硬盘 CDS', abbr: 'CDS', cat: '存储', count: 24, unit: '块', desc: '高可靠低时延的块存储' },
+    { name: '对象存储 OBS', abbr: 'OBS', cat: '存储', count: 6, unit: '个桶', desc: '稳定、安全、可靠的云存储' },
+    { name: '文件存储 NAS', abbr: 'NAS', cat: '存储', count: 0, unit: '个', desc: '可共享访问的弹性文件存储' },
+    { name: '密钥管理 KMS', abbr: 'KMS', cat: '存储', count: 0, unit: '个', desc: '密钥全生命周期安全托管' },
+    { name: '分布式数据库 TiDB', abbr: 'TiDB', cat: '数据库', count: 3, unit: '个', desc: '海量数据弹性扩展数据库' },
+    { name: '云数据库 RDS', abbr: 'RDS', cat: '数据库', count: 5, unit: '个实例', desc: '稳定可靠的关系型数据库' },
+    { name: '缓存 Redis', abbr: 'RDS', cat: '数据库', count: 2, unit: '个', desc: '高性能内存数据库服务' },
+    { name: '内容分发网络 CDN', abbr: 'CDN', cat: '视频云', count: 14, unit: '个域名', desc: '就近加速的内容分发网络' },
+    { name: '媒体处理 MPC', abbr: 'MPC', cat: '视频云', count: 0, unit: '个项目', desc: '大规模音视频转码处理' },
+    { name: '视频点播 VOD', abbr: 'VOD', cat: '视频云', count: 4, unit: '个', desc: '视频流畅播放服务' },
+    { name: '视频直播 LIVE', abbr: 'LIVE', cat: '视频云', count: 2, unit: '个', desc: '大规模实时转码低延时' },
+    { name: 'API市场 APIMKT', abbr: 'API', cat: 'API市场', count: 0, unit: '个应用', desc: '丰富的 API 能力即开即用' },
+    { name: '函数计算 FC', abbr: 'FC', cat: 'Serverless', count: 7, unit: '个函数', desc: '面向函数编程的 Serverless' },
+    { name: '消息队列 Pulsar', abbr: 'MQ', cat: 'Serverless', count: 3, unit: '个', desc: '企业级分布式消息服务' },
+    { name: '智能体交互 AIMI', abbr: 'AIMI', cat: '智能体', count: 0, unit: '个资源', desc: '开箱即用的智能体对话' },
+    { name: '智能体平台 AGENT', abbr: 'AGT', cat: '智能体', count: 5, unit: '个', desc: '智能体编排与托管平台' },
+    { name: '大语言模型 LLM', abbr: 'LLM', cat: 'AI开发', count: 9, unit: '个', desc: '多款主流大模型在线调用' },
+    { name: '图像理解 IU', abbr: 'IU', cat: 'AI开发', count: 0, unit: '个', desc: '图像内容理解与解析' },
+    { name: '语音识别 ASR', abbr: 'ASR', cat: 'AI开发', count: 3, unit: '个', desc: '高准确率语音转文字' },
+    { name: 'OCR识别 OCR', abbr: 'OCR', cat: 'AI开发', count: 6, unit: '个', desc: '文档识别、统一识别' },
+    { name: '云舟观测 GC', abbr: 'GC', cat: '数智应用', count: 1, unit: '个', desc: '一站式可观测运维平台' },
+    { name: '日志服务 LTS', abbr: 'LTS', cat: '数智应用', count: 5, unit: '个', desc: '日志采集检索与分析' },
+    { name: '数据智能 BI', abbr: 'BI', cat: '数智应用', count: 0, unit: '个', desc: '数据可视化分析与洞察' },
+    { name: '生活物联网 LifeIOT', abbr: 'IOT', cat: '物联网', count: 2, unit: '个', desc: '智能设备互联解决方案' },
+    { name: '设备接入 IoTHub', abbr: 'HUB', cat: '物联网', count: 0, unit: '个', desc: '海量设备安全接入管理' }
+  ];
+
+  /* 更多产品（待开通）：cat 用于分类筛选，rec 表示「推荐」 */
+  var MORE_PRODUCTS = [
+    { name: '函数计算 FC', cat: 'Serverless', desc: '面向函数编程与配置的Se…', rec: true },
+    { name: '消息队列 Pulsar', cat: 'Serverless', desc: '开源的企业级分布式消息…' },
+    { name: 'P2P内容分发 PCDN', cat: '视频云', desc: '利用闲置资源而构建的低…', rec: true },
+    { name: '内容审核 CM', cat: '数智应用', desc: '图片审核、文本审核、音…' },
+    { name: '大语言模型 LLM', cat: 'AI开发', desc: 'glm-5.2、qwen3.7-max…', rec: true },
+    { name: '图像理解 IU', cat: 'AI开发', desc: 'paddleocr-vl-1.6、qwen…' },
+    { name: '图像生成 IC', cat: 'AI开发', desc: 'qwen-image-2512' },
+    { name: '语音识别 ASR', cat: 'AI开发', desc: 'qwen3-asr-1.7b、paraf…' },
+    { name: '语音合成 TTS', cat: 'AI开发', desc: 'chattts、cosyvoice2…' },
+    { name: '视频生成 VS', cat: '视频云', desc: 'wan2.1-t2v-14b' },
+    { name: 'OCR识别 OCR', cat: 'AI开发', desc: '文档识别、统一识别 OCR…' },
+    { name: '大模型开发 TLM', cat: 'AI开发', desc: '大模型微调、训练', rec: true },
+    { name: 'AI标注 TLP', cat: 'AI开发', desc: '集成大模型标注和机器学…' },
+    { name: 'AI评测 TEP', cat: 'AI开发', desc: '评估大模型和智能体' },
+    { name: 'AI沙箱 Sandbox', cat: '智能体', desc: '提供安全隔离的沙箱环境', rec: true },
+    { name: '智能体记忆 AMS', cat: '智能体', desc: '为大模型应用设计的记忆层…' },
+    { name: '对象存储 OBS', cat: '存储', desc: '稳定、安全、可靠的云存储…' },
+    { name: '文件系统 PoleFS', cat: '存储', desc: '可大规模共享访问，弹性扩…' },
+    { name: '域名管理 DNS', cat: '计算', desc: '外网域名和内网域名便捷统…' },
+    { name: '证书管理 SSL', cat: '计算', desc: '为您提供 SSL 证书的上传…' },
+    { name: '云数据库 MySQL', cat: '数据库', desc: '稳定可靠、可弹性伸缩的关…' },
+    { name: 'KV数据库 ZestKV', cat: '数据库', desc: '360自研兼容Redis协议的…' },
+    { name: '向量数据库 Milvus', cat: '数据库', desc: '专为大规模向量数据检索和…', rec: true },
+    { name: '云数据库 PGSQL', cat: '数据库', desc: 'PostgreSQL关系型数据库' },
+    { name: 'KV数据库 ETCD', cat: '数据库', desc: '数据库 ETCD' },
+    { name: '视频会议 VCS', cat: '视频云', desc: '稳定安全的低延迟互动会议…' },
+    { name: '视频直播 LIVE', cat: '视频云', desc: '大规模实时转码、低延时的…' },
+    { name: '视频点播 VOD', cat: '视频云', desc: '视频流畅播放服务' },
+    { name: '音视频通话 RTC', cat: '视频云', desc: '便捷的跨平台实时音视频互…' },
+    { name: '生活物联网 LifeIOT', cat: '物联网', desc: '智能设备互联解决方案' },
+    { name: '设备接入 IoTHub', cat: '物联网', desc: '海量设备安全接入管理' },
+    { name: 'API市场 APIMKT', cat: 'API市场', desc: '丰富的 API 能力即开即用' }
+  ];
+
+  var RES_CATS = ['全部', '计算', '存储', '数据库', '视频云', 'Serverless', 'API市场', 'AI开发', '智能体', '数智应用', '物联网'];
+
+  // 分类配色：图标底色
+  // 统一使用品牌蓝色系，避免多色过于花哨
+  var RES_ICON_BG = 'linear-gradient(135deg,#9dc4ff,#0066FF)';
+  var RES_CAT_COLOR = {
+    '计算': RES_ICON_BG,
+    '存储': RES_ICON_BG,
+    '数据库': RES_ICON_BG,
+    '视频云': RES_ICON_BG,
+    'Serverless': RES_ICON_BG,
+    'API市场': RES_ICON_BG,
+    'AI开发': RES_ICON_BG,
+    '智能体': RES_ICON_BG,
+    '数智应用': RES_ICON_BG,
+    '物联网': RES_ICON_BG
+  };
+
+  var ICON_COLLAPSE = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>';
+
+  function initResourceOverview() {
+    var body = $('dash-res-body');
+    if (!body) return;
+
+    var tipBox = $('dash-res-tip');
+    var catsBox = $('dash-res-cats');
+    var footBox = $('dash-res-foot');
+    var searchInput = $('dash-res-search');
+    var updatedEl = $('dash-res-updated');
+    var refreshBtn = $('dash-res-refresh');
+
+    var state = {
+      cat: '全部',
+      keyword: '',
+      view: 'card',
+      expanded: false,
+      collapsedGroups: {}
+    };
+
+    var COLLAPSED_LIMIT = 5; // 「全部」分组时每组默认展示条数
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+    function stampNow() {
+      var d = new Date();
+      if (updatedEl) {
+        updatedEl.textContent = '数据更新于 ' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+          ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+      }
+    }
+
+    function filtered() {
+      var kw = state.keyword.trim().toLowerCase();
+      return RES_PRODUCTS.filter(function (p) {
+        if (state.cat !== '全部' && p.cat !== state.cat) return false;
+        if (kw && p.name.toLowerCase().indexOf(kw) < 0 && p.abbr.toLowerCase().indexOf(kw) < 0) return false;
+        return true;
+      });
+    }
+
+    // 已开通产品：以提示文案呈现（替代原独立卡片）
+    var ICON_INFO = '<svg viewBox="0 0 14 14" fill="none" width="13" height="13" aria-hidden="true">' +
+      '<circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/>' +
+      '<path d="M7 6.3v3.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>' +
+      '<circle cx="7" cy="4.4" r="0.6" fill="currentColor"/></svg>';
+
+    function renderStats() {
+      if (!tipBox) return;
+      tipBox.innerHTML = ICON_INFO + '当前账号共有 <strong>' + RES_PRODUCTS.length +
+        '</strong> 个已开通产品，部分产品尚未接入资源管理，实例数据仅供参考';
+    }
+
+    function renderCats() {
+      if (!catsBox) return;
+      catsBox.innerHTML = RES_CATS.map(function (c) {
+        var n = c === '全部'
+          ? RES_PRODUCTS.length
+          : RES_PRODUCTS.filter(function (p) { return p.cat === c; }).length;
+        if (!n) return '';
+        return '<button type="button" class="dash-cat-tab' + (state.cat === c ? ' active' : '') +
+          '" role="tab" data-cat="' + escapeHtml(c) + '">' + escapeHtml(c) +
+          '<span class="dash-cat-badge">' + n + '</span></button>';
+      }).join('');
+    }
+
+    function cardHtml(p) {
+      var bg = RES_CAT_COLOR[p.cat] || RES_ICON_BG;
+      // 暂无资源时展示产品简介，替代「暂无资源」文案
+      var num = p.count > 0
+        ? '<span class="dash-res-card2-count">' + p.count + '<span class="dash-res-card2-unit"> ' + escapeHtml(p.unit) + '</span></span>'
+        : '<span class="dash-res-card2-desc" title="' + escapeHtml(p.desc || '') + '">' + escapeHtml(p.desc || '') + '</span>';
+      return '<a class="dash-res-card2' + (p.count > 0 ? '' : ' is-empty') + '" href="javascript:void(0)" title="' + escapeHtml(p.name) + '">' +
+        '<span class="dash-res-card2-ico" style="background:' + bg + '">' + escapeHtml(p.abbr) + '</span>' +
+        '<span class="dash-res-card2-info">' +
+        '<span class="dash-res-card2-name"><span class="dash-res-card2-name-text">' + escapeHtml(p.name) + '</span></span>' + num +
+        '</span></a>';
+    }
+
+    function groupHtml(cat, items) {
+      var collapsed = !!state.collapsedGroups[cat];
+      var shown = items;
+      if (!collapsed && !state.expanded && state.cat === '全部' && items.length > COLLAPSED_LIMIT) {
+        shown = items.slice(0, COLLAPSED_LIMIT);
+      }
+      var more = items.length - shown.length;
+      return '<div class="dash-res-group" data-group="' + escapeHtml(cat) + '">' +
+        '<div class="dash-res-group-hd">' +
+        '<span class="dash-group-name">' + escapeHtml(cat) +
+        '<span class="dash-cat-badge">' + items.length + '</span></span>' +
+        '<button type="button" class="dash-group-toggle' + (collapsed ? ' collapsed' : '') +
+        '" data-group-toggle="' + escapeHtml(cat) + '">' + (collapsed ? '展开' : '收起') + ICON_COLLAPSE + '</button>' +
+        '</div>' +
+        (collapsed ? '' : '<div class="dash-res-grid">' + shown.map(cardHtml).join('') + '</div>' +
+          (more > 0 ? '<div class="dash-res-foot"><span class="dash-res-updated">该分类还有 ' + more + ' 项，点击下方「展开全部」查看</span></div>' : '')) +
+        '</div>';
+    }
+
+    function renderBody() {
+      var list = filtered();
+      body.setAttribute('data-view', state.view);
+
+      if (!list.length) {
+        body.innerHTML = '<div class="dash-res-empty">没有匹配的产品，试试调整筛选条件</div>';
+        if (footBox) footBox.innerHTML = '';
+        return;
+      }
+
+      if (state.cat === '全部') {
+        var order = RES_CATS.slice(1);
+        var html = '';
+        order.forEach(function (c) {
+          var items = list.filter(function (p) { return p.cat === c; });
+          if (items.length) html += groupHtml(c, items);
+        });
+        body.innerHTML = html;
+      } else {
+        body.innerHTML = '<div class="dash-res-grid">' + list.map(cardHtml).join('') + '</div>';
+      }
+
+      // footer：仅在「全部」且存在被折叠的条目时显示
+      if (footBox) {
+        var hidden = 0;
+        if (state.cat === '全部' && !state.expanded) {
+          RES_CATS.slice(1).forEach(function (c) {
+            if (state.collapsedGroups[c]) return;
+            var n = list.filter(function (p) { return p.cat === c; }).length;
+            if (n > COLLAPSED_LIMIT) hidden += n - COLLAPSED_LIMIT;
+          });
+        }
+        if (state.cat === '全部' && (hidden > 0 || state.expanded)) {
+          footBox.innerHTML = '<button type="button" class="dash-res-foot-btn' + (state.expanded ? ' expanded' : '') +
+            '" id="dash-res-expand">' + (state.expanded ? '收起' : '展开全部（还有 ' + hidden + ' 项）') + ICON_COLLAPSE + '</button>';
+        } else {
+          footBox.innerHTML = '';
+        }
+      }
+    }
+
+    function renderAll() {
+      renderStats();
+      renderCats();
+      renderBody();
+    }
+
+    // ---- 事件绑定（委托）----
+    if (catsBox) {
+      catsBox.addEventListener('click', function (e) {
+        var btn = e.target.closest('.dash-cat-tab');
+        if (!btn) return;
+        state.cat = btn.getAttribute('data-cat');
+        state.expanded = false;
+        renderCats();
+        renderBody();
+      });
+    }
+
+    body.addEventListener('click', function (e) {
+      var tg = e.target.closest('[data-group-toggle]');
+      if (tg) {
+        var g = tg.getAttribute('data-group-toggle');
+        state.collapsedGroups[g] = !state.collapsedGroups[g];
+        renderBody();
+      }
+    });
+
+    if (footBox) {
+      footBox.addEventListener('click', function (e) {
+        if (e.target.closest('#dash-res-expand')) {
+          state.expanded = !state.expanded;
+          renderBody();
+        }
+      });
+    }
+
+    if (searchInput) {
+      // 仅在回车时触发搜索，不做实时搜索
+      searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          state.keyword = searchInput.value;
+          state.expanded = true;
+          renderBody();
+        }
+      });
+    }
+
+    document.querySelectorAll('.dash-view-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.dash-view-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        state.view = btn.getAttribute('data-view') || 'card';
+        renderBody();
+      });
+    });
+
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', function () {
+        refreshBtn.style.opacity = '.5';
+        setTimeout(function () {
+          refreshBtn.style.opacity = '';
+          stampNow();
+          renderAll();
+        }, 320);
+      });
+    }
+
+    stampNow();
+    renderAll();
+  }
+
+  /* ==========================================================
+     更多产品：分类切换 → 筛选下方产品卡片
+     ========================================================== */
+  var MORE_CAT_ICON = {
+    'Serverless': '<path d="M9 1.8L3.5 9h4l-1 5.2L12.5 7h-4l.5-5.2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>',
+    'API市场': '<circle cx="8" cy="8" r="5.8" stroke="currentColor" stroke-width="1.2"/><path d="M2.2 8h11.6M8 2.2c1.7 1.8 1.7 9.8 0 11.6M8 2.2c-1.7 1.8-1.7 9.8 0 11.6" stroke="currentColor" stroke-width="1.1"/>',
+    'AI开发': '<rect x="3.5" y="3.5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 1.8v1.7M10 1.8v1.7M6 12.5v1.7M10 12.5v1.7M1.8 6h1.7M1.8 10h1.7M12.5 6h1.7M12.5 10h1.7" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/><path d="M6.3 10l1.2-4h1l1.2 4M6.8 8.6h2.4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>',
+    '智能体': '<rect x="3" y="5" width="10" height="7.5" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M8 2.5V5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="6.2" cy="8.6" r="0.9" fill="currentColor"/><circle cx="9.8" cy="8.6" r="0.9" fill="currentColor"/>',
+    '存储': '<rect x="2" y="4" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 8.5h12" stroke="currentColor" stroke-width="1.2"/><circle cx="4.6" cy="10.3" r="0.6" fill="currentColor"/>',
+    '计算': '<rect x="2.5" y="2.5" width="11" height="4.5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="2.5" y="9" width="11" height="4.5" rx="1" stroke="currentColor" stroke-width="1.2"/><circle cx="5" cy="4.75" r="0.6" fill="currentColor"/><circle cx="5" cy="11.25" r="0.6" fill="currentColor"/>',
+    '数据库': '<ellipse cx="8" cy="4" rx="4.8" ry="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M3.2 4v8c0 1 2.1 1.8 4.8 1.8s4.8-.8 4.8-1.8V4M3.2 8c0 1 2.1 1.8 4.8 1.8s4.8-.8 4.8-1.8" stroke="currentColor" stroke-width="1.2"/>',
+    '视频云': '<rect x="2" y="3.5" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M6.8 6.2l3.2 1.8-3.2 1.8V6.2z" fill="currentColor"/>',
+    '数智应用': '<path d="M2.5 13.5h11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><rect x="3.5" y="8" width="2" height="4" stroke="currentColor" stroke-width="1.1"/><rect x="7" y="5" width="2" height="7" stroke="currentColor" stroke-width="1.1"/><rect x="10.5" y="2.5" width="2" height="9.5" stroke="currentColor" stroke-width="1.1"/>',
+    '物联网': '<circle cx="8" cy="8" r="1.6" stroke="currentColor" stroke-width="1.2"/><circle cx="3.5" cy="3.5" r="1.3" stroke="currentColor" stroke-width="1.1"/><circle cx="12.5" cy="3.5" r="1.3" stroke="currentColor" stroke-width="1.1"/><circle cx="3.5" cy="12.5" r="1.3" stroke="currentColor" stroke-width="1.1"/><circle cx="12.5" cy="12.5" r="1.3" stroke="currentColor" stroke-width="1.1"/><path d="M4.5 4.5l2.3 2.3M11.5 4.5L9.2 6.8M4.5 11.5l2.3-2.3M11.5 11.5L9.2 9.2" stroke="currentColor" stroke-width="1.1"/>'
+  };
+
+  var ICON_STAR = '<svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M8 2l1.8 3.7 4 .6-2.9 2.8.7 4L8 11.2 4.4 13.1l.7-4L2.2 6.3l4-.6L8 2z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>';
+  var ICON_DOC = '<svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M4 2h5.5L12.5 5v9H4V2z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/><path d="M6 7.5h4.5M6 10h4.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>';
+
+  function initMoreProducts() {
+    var tabsBox = $('dash-more-tabs');
+    var grid = $('dash-more-grid');
+    var searchInput = $('dash-more-search');
+    if (!tabsBox || !grid) return;
+
+    var current = '全部';
+    var keyword = '';
+
+    function match(p) {
+      if (current !== '全部') {
+        if (current === '推荐') { if (!p.rec) return false; }
+        else if (p.cat !== current) return false;
+      }
+      var kw = keyword.trim().toLowerCase();
+      if (kw && p.name.toLowerCase().indexOf(kw) < 0) return false;
+      return true;
+    }
+
+    function moreCardHtml(p) {
+      var glyph = MORE_CAT_ICON[p.cat] || MORE_CAT_ICON['计算'];
+      return '<a class="dash-more-card" href="javascript:void(0)">' +
+        '<span class="dash-more-icon"><svg viewBox="0 0 16 16" fill="none" width="16" height="16">' + glyph + '</svg></span>' +
+        '<span class="dash-more-info">' +
+          '<span class="dash-more-name-row">' +
+            '<span class="dash-more-name" title="' + escapeHtml(p.name) + '">' + escapeHtml(p.name) + '</span>' +
+            '<span class="dash-more-acts">' +
+              '<span class="dash-more-act" title="收藏">' + ICON_STAR + '</span>' +
+              '<span class="dash-more-act" title="产品文档">' + ICON_DOC + '</span>' +
+            '</span>' +
+          '</span>' +
+          '<span class="dash-more-desc" title="' + escapeHtml(p.desc) + '">' + escapeHtml(p.desc) + '</span>' +
+          '<span class="dash-more-open">立即开通 &gt;</span>' +
+        '</span>' +
+        '</a>';
+    }
+
+    function render() {
+      var list = MORE_PRODUCTS.filter(match);
+      grid.innerHTML = list.length
+        ? list.map(moreCardHtml).join('')
+        : '<div class="dash-res-empty dash-more-empty">该分类下暂无待开通产品</div>';
+    }
+
+    tabsBox.addEventListener('click', function (e) {
+      var btn = e.target.closest('.dash-tab');
+      if (!btn) return;
+      current = btn.getAttribute('data-cat') || '全部';
+      tabsBox.querySelectorAll('.dash-tab').forEach(function (t) {
+        var on = t === btn;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      render();
+    });
+
+    if (searchInput) {
+      // 仅在回车时触发搜索，不做实时搜索
+      searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          keyword = searchInput.value;
+          render();
+        }
+      });
+    }
+
+    render();
+  }
+
+  /* ==========================================================
+     产品与资源：一级 Tab（资源概览 / 更多产品）
+     ========================================================== */
+  function initPaneTabs() {
+    var tabsBox = $('dash-pane-tabs');
+    if (!tabsBox) return;
+    var section = document.getElementById('dash-res-section');
+    if (!section) return;
+
+    function activate(name) {
+      tabsBox.querySelectorAll('.dash-pane-tab').forEach(function (t) {
+        var on = t.getAttribute('data-pane') === name;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      section.querySelectorAll('.dash-pane').forEach(function (p) {
+        p.hidden = p.getAttribute('data-pane') !== name;
+      });
+      section.querySelectorAll('[data-pane-actions]').forEach(function (a) {
+        a.hidden = a.getAttribute('data-pane-actions') !== name;
+      });
+    }
+
+    tabsBox.addEventListener('click', function (e) {
+      var btn = e.target.closest('.dash-pane-tab');
+      if (!btn) return;
+      activate(btn.getAttribute('data-pane') || 'res');
+    });
+
+    activate('res');
+  }
+
+  /* ==========================================================
+     分类布局方案切换 + 吸顶状态检测
+     方案1（h）：分类横排，滚动时吸顶
+     方案2（v）：分类纵向排列在左侧，卡片在右侧
+     ========================================================== */
+  function initSchemeSwitch() {
+    var box = $('dash-scheme-switch');
+    var wrap = $('dash-more-wrap');
+    var dashPage = $('dashboard-page');
+    if (!box || !wrap || !dashPage) return;
+
+    // 悬浮框仅在总览页可见时展示
+    function syncVisible() { box.hidden = !!dashPage.hidden; }
+    syncVisible();
+    // 总览页由 hidden 属性切换，用 MutationObserver 跟随
+    if (window.MutationObserver) {
+      new MutationObserver(syncVisible).observe(dashPage, {
+        attributes: true, attributeFilter: ['hidden']
+      });
+    }
+
+    box.addEventListener('click', function (e) {
+      var btn = e.target.closest('.dash-scheme-btn');
+      if (!btn) return;
+      var scheme = btn.getAttribute('data-scheme') || 'h';
+      // 同步更多产品区和资源概览区的布局属性
+      wrap.setAttribute('data-layout', scheme);
+      var morePane = document.querySelector('.dash-pane[data-pane="more"]');
+      if (morePane) morePane.setAttribute('data-layout', scheme);
+      var resPane = document.querySelector('.dash-pane[data-pane="res"]');
+      if (resPane) resPane.setAttribute('data-layout', scheme);
+      box.querySelectorAll('.dash-scheme-btn').forEach(function (b) {
+        b.classList.toggle('active', b === btn);
+      });
+      // 切换后回到分类行位置，便于直接对比
+      var tabs = $('dash-more-tabs');
+      if (tabs && !dashPage.hidden) {
+        tabs.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+
+    // 吸顶投影：sticky 元素贴住容器顶部时加 is-stuck
+    var stickies = [$('dash-more-tabs')];
+    var toolbar = document.querySelector('.dash-pane[data-pane="res"] .dash-res-toolbar');
+    if (toolbar) stickies.push(toolbar);
+
+    function syncStuck() {
+      stickies.forEach(function (el) {
+        if (!el || el.offsetParent === null) return;
+        // 容器顶部为 0，元素 top 贴到 0 即为吸顶
+        var top = el.getBoundingClientRect().top;
+        var pageTop = dashPage.getBoundingClientRect().top;
+        el.classList.toggle('is-stuck', top - pageTop <= 1);
+      });
+    }
+    dashPage.addEventListener('scroll', syncStuck, { passive: true });
+    syncStuck();
+  }
+
+  // 资源概览的分类工具栏同样启用吸顶，并初始化布局属性（默认横向）
+  (function markResSticky() {
+    var pane = document.querySelector('.dash-pane[data-pane="res"]');
+    if (!pane) return;
+    pane.classList.add('dash-res-pane-sticky');
+    if (!pane.getAttribute('data-layout')) pane.setAttribute('data-layout', 'h');
+  })();
+
   // 在所有初始化完成后执行
   initDashboard();
+  initResourceOverview();
+  initMoreProducts();
+  initPaneTabs();
+  initSchemeSwitch();
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
