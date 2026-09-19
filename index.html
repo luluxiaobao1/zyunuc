@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>结算单元 - 访问控制 - 360智汇云</title>
-  <link rel="stylesheet" href="shared/base.css?v=20260911a">
-  <link rel="stylesheet" href="styles.css?v=20260911d">
+  <link rel="stylesheet" href="shared/base.css?v=20260919a">
+  <link rel="stylesheet" href="styles.css?v=20260919a">
 </head>
 
 <body>
@@ -25,13 +25,89 @@
           </svg>
           <span>工作台总览</span>
         </button>
-        <button class="nav-btn group">
-          <svg class="ico" viewBox="0 0 16 16" fill="none">
-            <rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2" />
-            <path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-          </svg>
-          <span>360集团</span>
-        </button>
+        <!-- 企业切换入口：hover 显示当前资源组名称 tooltip，点击打开弹框 -->
+        <div class="rg-switch-entry" id="rg-switch-entry">
+          <button class="nav-btn rg-switch-btn" id="rg-switch-btn" type="button" aria-haspopup="dialog" aria-expanded="false">
+            <span class="rg-entry-badge" id="rg-entry-badge">组</span>
+            <span class="rg-entry-corp" id="rg-entry-corp">360集团</span>
+            <svg class="dropdown-arrow" viewBox="0 0 12 12" fill="none">
+              <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <!-- hover tooltip：企业 → 结算单元 → 资源组 层级展示 -->
+          <div class="rg-hover-tip" id="rg-hover-tip" role="tooltip">
+            <!-- 企业行 -->
+            <div class="rg-hover-tip__row rg-hover-tip__row--enterprise">
+              <span class="rg-hover-tip__badge rg-hover-tip__badge--enterprise">企</span>
+              <span class="rg-hover-tip__row-name" id="rg-tip-enterprise-name">360集团</span>
+              <span class="rg-hover-tip__sub-label">（企业管理权限）</span>
+            </div>
+            <!-- 结算单元行 -->
+            <div class="rg-hover-tip__row rg-hover-tip__row--unit">
+              <span class="rg-hover-tip__indent rg-hover-tip__indent--1">
+                <svg class="rg-hover-tip__tree-line" viewBox="0 0 10 20" fill="none" width="10" height="20"><path d="M5 0 v12 q0 6 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
+              </span>
+              <span class="rg-hover-tip__badge rg-hover-tip__badge--unit">结</span>
+              <span class="rg-hover-tip__row-name" id="rg-tip-unit-name">协管平台部–数据平台部</span>
+            </div>
+            <!-- 资源组行 -->
+            <div class="rg-hover-tip__row rg-hover-tip__row--group">
+              <span class="rg-hover-tip__indent rg-hover-tip__indent--2">
+                <svg class="rg-hover-tip__tree-line" viewBox="0 0 10 20" fill="none" width="10" height="20"><path d="M5 0 v12 q0 6 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
+              </span>
+              <span class="rg-hover-tip__badge rg-hover-tip__badge--group">组</span>
+              <span class="rg-hover-tip__row-name" id="rg-hover-tip-name">对外项目应用</span>
+              <a class="rg-hover-tip__mgr" href="#" tabindex="-1" id="rg-tip-mgr-link">去管理</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 切换资源组弹框（Portal 级，挂在 body 末尾由 JS 移动） -->
+        <div class="rg-modal-overlay" id="rg-modal-overlay" role="dialog" aria-modal="true" aria-label="切换资源组" hidden>
+          <div class="rg-modal" id="rg-modal">
+            <!-- 弹框头 -->
+            <div class="rg-modal__hd">
+              <h2 class="rg-modal__title">切换资源组</h2>
+              <button class="rg-modal__close" id="rg-modal-close" type="button" aria-label="关闭">
+                <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <!-- 企业选择器 + 搜索 + 资源组管理 -->
+            <div class="rg-modal__toolbar">
+              <div class="rg-corp-select" id="rg-corp-select">
+                <span class="rg-corp-badge">企</span>
+                <span class="rg-corp-name" id="rg-corp-name">360集团</span>
+                <svg class="rg-corp-arrow" viewBox="0 0 12 12" fill="none" width="12" height="12">
+                  <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <!-- 企业下拉列表（后续可扩展多企业） -->
+                <div class="rg-corp-dropdown" id="rg-corp-dropdown" hidden>
+                  <div class="rg-corp-option rg-corp-option--active" data-corp="360集团">
+                    <span class="rg-corp-badge rg-corp-badge--sm">企</span>360集团
+                    <svg class="rg-corp-check" viewBox="0 0 14 14" fill="none" width="14" height="14"><path d="M2.5 7l3.5 3.5 5.5-7" stroke="var(--primary-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </div>
+              </div>
+              <div class="rg-modal__search">
+                <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                <input type="text" id="rg-modal-search" placeholder="按关键字搜索" autocomplete="off" aria-label="搜索资源组">
+              </div>
+              <a class="rg-modal__mgr-link" href="#" tabindex="0">资源组管理</a>
+            </div>
+            <!-- 最近浏览 -->
+            <div class="rg-recent" id="rg-recent">
+              <span class="rg-recent__label">
+                <svg viewBox="0 0 14 14" fill="none" width="12" height="12"><circle cx="7" cy="7" r="5.2" stroke="currentColor" stroke-width="1.2"/><path d="M7 4.2V7l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                最近浏览
+              </span>
+              <div class="rg-recent__list" id="rg-recent-list"></div>
+            </div>
+            <!-- 树形列表区 -->
+            <div class="rg-modal__body" id="rg-modal-body">
+              <!-- 由 JS 渲染 -->
+            </div>
+          </div>
+        </div>
       </div>
       <div class="header-right">
         <div class="ai-entry">ai</div>
@@ -992,7 +1068,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260910d"></script>
+  <script src="app.js?v=20260918a"></script>
 </body>
 
 </html>

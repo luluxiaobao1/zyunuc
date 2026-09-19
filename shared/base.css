@@ -249,6 +249,721 @@ body.subview .main-content {
   color: var(--text-tertiary);
 }
 
+/* ============ 资源组切换入口（导航栏） ============ */
+.rg-switch-entry {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.rg-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  height: 30px;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.rg-switch-btn:hover,
+.rg-switch-btn.is-open {
+  background: #EEF6FF;
+  border-color: #c5dcff;
+  color: var(--primary-color);
+}
+
+.rg-entry-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 4px;
+  background: #E8F1FF;
+  color: var(--primary-color);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.rg-entry-corp {
+  font-size: 14px;
+  font-weight: 500;
+  color: inherit;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-btn .dropdown-arrow,
+.rg-switch-btn .dropdown-arrow {
+  width: 12px;
+  height: 12px;
+  color: var(--text-tertiary);
+  flex: none;
+  margin-left: 2px;
+  transition: transform 0.2s ease;
+}
+
+.rg-switch-btn.is-open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* ---- hover dropdown：企业 → 结算单元 → 资源组 层级 ---- */
+.rg-hover-tip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: #fff;
+  border: 1px solid #dde3ef;
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 260px;
+  max-width: 360px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
+  z-index: 600;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* 小箭头 */
+.rg-hover-tip::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 16px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #dde3ef;
+}
+
+.rg-hover-tip::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 16px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #fff;
+}
+
+.rg-switch-entry:hover .rg-hover-tip {
+  display: block;
+}
+
+/* 弹框打开时不显示 tooltip */
+.rg-switch-entry.modal-open .rg-hover-tip {
+  display: none !important;
+}
+
+/* 每一行 */
+.rg-hover-tip__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+}
+
+.rg-hover-tip__row + .rg-hover-tip__row {
+  margin-top: 2px;
+}
+
+/* 缩进占位 + 树线 */
+.rg-hover-tip__indent {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: #c5cfdf;
+}
+
+.rg-hover-tip__indent--1 {
+  width: 16px;
+}
+
+.rg-hover-tip__indent--2 {
+  width: 16px;   /* 单层缩进，两层累加由嵌套决定 */
+  margin-left: 16px;
+}
+
+.rg-hover-tip__indent--3 {
+  width: 16px;
+  margin-left: 32px;
+}
+
+.rg-hover-tip__indent--4 {
+  width: 16px;
+  margin-left: 48px;
+}
+
+.rg-hover-tip__tree-line {
+  display: block;
+  flex: none;
+}
+
+/* 文件夹徽章：橙黄色系（双类名提高优先级，避免被基础徽章样式覆盖） */
+.rg-hover-tip__badge.rg-hover-tip__badge--folder {
+  background: #FFF3E0;
+  color: #E65100;
+}
+
+/* 子项目徽章：青绿色系，与资源组区分 */
+.rg-hover-tip__badge.rg-hover-tip__badge--subproject {
+  background: #E6F7F2;
+  color: #0B8A6A;
+}
+
+/* 类型徽章：浅蓝底 + 主色字 */
+.rg-hover-tip__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  background: #E8F1FF;
+  color: var(--primary-color, #3370ff);
+}
+
+/* 行文字 */
+.rg-hover-tip__row-name {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rg-hover-tip__row--enterprise .rg-hover-tip__row-name {
+  font-weight: 500;
+}
+
+/* 企业行副标签 */
+.rg-hover-tip__sub-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  flex: none;
+}
+
+/* 资源组行「去管理」链接 */
+.rg-hover-tip__mgr {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--primary-color, #3370ff);
+  text-decoration: none;
+  flex: none;
+  pointer-events: auto;
+}
+
+.rg-hover-tip__mgr:hover {
+  text-decoration: underline;
+}
+
+/* ============ 切换资源组弹框 ============ */
+.rg-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 64px;
+}
+
+.rg-modal-overlay[hidden] {
+  display: none;
+}
+
+.rg-modal {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  width: 580px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 96px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 弹框头 */
+.rg-modal__hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--border-color);
+  flex: none;
+}
+
+.rg-modal__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rg-modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.rg-modal__close:hover {
+  background: var(--bg-gray);
+  color: var(--text-primary);
+}
+
+/* 工具栏：企业选择 + 搜索 + 跳转 */
+.rg-modal__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  flex: none;
+}
+
+/* 企业选择器 */
+.rg-corp-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  background: #fff;
+  min-width: 130px;
+  flex: none;
+  user-select: none;
+  transition: border-color 0.15s;
+}
+
+.rg-corp-select:hover {
+  border-color: var(--primary-color);
+}
+
+.rg-corp-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 4px;
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.rg-corp-badge--sm {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  font-size: 11px;
+  border-radius: 3px;
+}
+
+.rg-corp-name {
+  font-size: 14px;
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rg-corp-arrow {
+  color: var(--text-tertiary);
+  flex: none;
+  transition: transform 0.2s;
+}
+
+.rg-corp-select.is-open .rg-corp-arrow {
+  transform: rotate(180deg);
+}
+
+.rg-corp-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  z-index: 10;
+  padding: 4px;
+}
+
+.rg-corp-dropdown[hidden] { display: none; }
+
+.rg-corp-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  font-size: 14px;
+  color: var(--text-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.rg-corp-option:hover {
+  background: var(--bg-gray);
+}
+
+.rg-corp-option--active {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.rg-corp-check {
+  margin-left: auto;
+  flex: none;
+}
+
+/* 搜索框 */
+.rg-modal__search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 5px 10px;
+  background: #fff;
+  transition: border-color 0.15s;
+  color: var(--text-tertiary);
+}
+
+.rg-modal__search:focus-within {
+  border-color: var(--primary-color);
+  color: var(--text-secondary);
+}
+
+.rg-modal__search input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: transparent;
+  flex: 1;
+  min-width: 0;
+}
+
+.rg-modal__search input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* 资源组管理链接 */
+.rg-modal__mgr-link {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px;
+  height: 32px;
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--primary-color);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.rg-modal__mgr-link:hover {
+  background: #EEF6FF;
+}
+
+/* 最近浏览 */
+.rg-recent {
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid var(--border-color);
+  flex: none;
+}
+
+.rg-recent__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-right: 8px;
+}
+
+.rg-recent__list {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.rg-recent__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--primary-color);
+  background: #EEF6FF;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 0.12s, background 0.12s;
+  white-space: nowrap;
+}
+
+.rg-recent__item:hover {
+  border-color: var(--primary-color);
+}
+
+.rg-recent__item.is-active {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+/* 树形列表区 */
+.rg-modal__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0 12px;
+}
+
+/* ---- 企业节点 ---- */
+.rg-tree-enterprise {
+  padding: 8px 16px 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ---- 结算单元节点 ---- */
+.rg-tree-unit {
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: #f7f9fc;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  margin-top: 4px;
+}
+
+/* ---- 资源组文件夹节点 ---- */
+.rg-tree-folder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px 6px 28px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s;
+}
+
+.rg-tree-folder:hover {
+  background: #FDF3E3;
+}
+
+/* 展开时：文件夹标题条本身也着色，与下方内容形成一整块区域 */
+.rg-tree-folder.is-open {
+  background: #FFF8EC;
+  box-shadow: inset 3px 0 0 #F5A623;
+}
+
+/* 文件夹展开时，内容区加背景色，用来区分文件夹归属范围 */
+.rg-tree-folder-content {
+  background: #FFF8EC;
+  box-shadow: inset 3px 0 0 #F5A623;
+  padding-bottom: 4px;
+}
+
+/* 文件夹内的资源组：背景已着色，hover/选中态用蓝色高亮以保持一致的交互反馈 */
+.rg-tree-folder-content .rg-tree-group:hover,
+.rg-tree-folder-content .rg-tree-group.is-active {
+  background: #EEF6FF;
+}
+
+/* arrow 移到右侧，改为上下箭头 */
+.rg-tree-folder__arrow {
+  flex: none;
+  color: var(--text-tertiary);
+  transition: transform 0.18s;
+  margin-left: auto;
+}
+
+/* 展开时向上（收起时默认向下） */
+.rg-tree-folder.is-open .rg-tree-folder__arrow {
+  transform: rotate(180deg);
+}
+
+.rg-tree-folder__icon {
+  flex: none;
+  color: #f5a623;
+}
+
+.rg-tree-folder__name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+/* ---- 资源组节点 ---- */
+.rg-tree-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px 7px 40px;
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+}
+
+.rg-tree-group:hover {
+  background: #EEF6FF;
+}
+
+.rg-tree-group.is-active {
+  background: #EEF6FF;
+}
+
+.rg-tree-group__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  border-radius: 3px;
+  background: #E8F1FF;
+  color: var(--primary-color);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.rg-tree-group__name {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rg-tree-group.is-active .rg-tree-group__name {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.rg-tree-group__mgr {
+  font-size: 12px;
+  color: var(--primary-color);
+  text-decoration: none;
+  flex: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.rg-tree-group:hover .rg-tree-group__mgr {
+  opacity: 1;
+}
+
+.rg-tree-group__check {
+  flex: none;
+  color: var(--primary-color);
+  width: 18px;
+  height: 18px;
+}
+
+/* ---- 子项目容器：一行放两个 ---- */
+.rg-tree-subproject-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 0 16px 0 56px;
+}
+
+/* ---- 子项目节点（资源组的子项） ---- */
+.rg-tree-subproject {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: background 0.12s;
+  min-width: 0;
+}
+
+.rg-tree-subproject:hover {
+  background: #f0f7ff;
+}
+
+.rg-tree-subproject.is-active {
+  background: #EEF6FF;
+}
+
+.rg-tree-subproject__dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: var(--border-color);
+}
+
+.rg-tree-subproject.is-active .rg-tree-subproject__dot {
+  background: var(--primary-color);
+}
+
+.rg-tree-subproject__name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rg-tree-subproject.is-active .rg-tree-subproject__name {
+  color: var(--primary-color);
+}
+
+/* 搜索无结果 */
+.rg-no-result {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
 /* ============ 主体容器 ============ */
 .container {
   flex: 1;

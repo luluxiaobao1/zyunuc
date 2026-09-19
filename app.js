@@ -2206,4 +2206,423 @@
       showView(item.dataset.page, item.querySelector('span').textContent);
     });
   });
+
+  /* ==========================================================
+     切换资源组弹框
+     层级：企业 → 结算单元 → 资源组文件夹 → 资源组 → 子项目
+     ========================================================== */
+  function initRgSwitchModal() {
+    var entry    = $('rg-switch-entry');
+    var btn      = $('rg-switch-btn');
+    var overlay  = $('rg-modal-overlay');
+    var closeBtn = $('rg-modal-close');
+    var searchInput = $('rg-modal-search');
+    var recentList  = $('rg-recent-list');
+    var modalBody   = $('rg-modal-body');
+    var tipName     = $('rg-hover-tip-name');
+    var tipEntName  = $('rg-tip-enterprise-name');
+    var tipUnitName = $('rg-tip-unit-name');
+    var corpNameEl  = $('rg-corp-name');
+    var entryCorpEl = $('rg-entry-corp');
+    var entryBadge  = $('rg-entry-badge');
+
+    if (!btn || !overlay) return;
+
+    /* ---- 数据模型 ---- */
+    // 树形结构：企业 → 结算单元 → 资源组文件夹（可选）→ 资源组 → 子项目
+    var TREE = [
+      {
+        type: 'enterprise', id: 'e1', name: '360集团',
+        children: [
+          {
+            type: 'unit', id: 'u1', name: '上海淇毓信息-360数科-360借条',
+            children: [
+              {
+                type: 'group', id: 'g1', name: '360借条-资源包',
+                children: [
+                  { type: 'subproject', id: 'sp1', name: '360借条-资源包-生产' },
+                  { type: 'subproject', id: 'sp2', name: '360借条-资源包-测试' }
+                ]
+              },
+              { type: 'group', id: 'g2', name: '360贷款', children: [] },
+              { type: 'group', id: 'g3', name: '360贷款-生产', children: [] },
+              { type: 'group', id: 'g4', name: '360贷款测试环境', children: [] },
+              { type: 'group', id: 'g5', name: '360贷款基础服务', children: [] },
+              { type: 'group', id: 'g6', name: '360贷款实时进件', children: [] },
+              { type: 'group', id: 'g7', name: '360借条', children: [] },
+              { type: 'group', id: 'g8', name: '360借条-CDN', children: [] }
+            ]
+          },
+          {
+            type: 'unit', id: 'u2', name: '360数科-通用服务',
+            children: [
+              {
+                type: 'folder', id: 'f1', name: '通用基础设施',
+                children: [
+                  {
+                    type: 'group', id: 'g9', name: '对外项目应用',
+                    children: [
+                      { type: 'subproject', id: 'sp3', name: '对外项目应用-生产' },
+                      { type: 'subproject', id: 'sp4', name: '对外项目应用-预发' }
+                    ]
+                  },
+                  {
+                    type: 'group', id: 'g10', name: '大模型算法组',
+                    children: [
+                      { type: 'subproject', id: 'sp5', name: '大模型算法组-训练' },
+                      { type: 'subproject', id: 'sp6', name: '大模型算法组-推理' }
+                    ]
+                  }
+                ]
+              },
+              { type: 'group', id: 'g11', name: '邮件网关智能体', children: [] },
+              { type: 'group', id: 'g12', name: 'Agent平台', children: [] },
+              { type: 'group', id: 'g13', name: '业务平台部-Agent', children: [] },
+              { type: 'group', id: 'g14', name: '数字安全集团-销售...', children: [] }
+            ]
+          }
+        ]
+      }
+    ];
+
+    // 最近浏览（初始与默认选中保持一致）
+    var recentIds = ['g1', 'g9', 'g10', 'g11', 'g12'];
+    var activeId  = 'g1';   // 当前选中资源组 id
+
+    /* ---- 辅助：按 id 查找节点 ---- */
+    function findNode(nodes, id) {
+      for (var i = 0; i < nodes.length; i++) {
+        var n = nodes[i];
+        if (n.id === id) return n;
+        if (n.children && n.children.length) {
+          var found = findNode(n.children, id);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
+    /* ---- 辅助：收集所有资源组（type === 'group'）---- */
+    function collectGroups(nodes, result) {
+      result = result || [];
+      nodes.forEach(function (n) {
+        if (n.type === 'group') result.push(n);
+        if (n.children && n.children.length) collectGroups(n.children, result);
+      });
+      return result;
+    }
+
+    /* ---- 辅助：查找从根到目标节点的路径（含目标自身）---- */
+    function findPath(nodes, id, trail) {
+      trail = trail || [];
+      for (var i = 0; i < nodes.length; i++) {
+        var n = nodes[i];
+        var next = trail.concat([n]);
+        if (n.id === id) return next;
+        if (n.children && n.children.length) {
+          var found = findPath(n.children, id, next);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
+    /* ---- 辅助：从路径中取指定层级节点 ---- */
+    function pickByType(path, type) {
+      if (!path) return null;
+      for (var i = 0; i < path.length; i++) {
+        if (path[i].type === type) return path[i];
+      }
+      return null;
+    }
+
+    /* ---- 更新导航栏入口 + hover 层级面板 ---- */
+    function syncEntryLabel() {
+      var path = findPath(TREE, activeId);
+      var node = path ? path[path.length - 1] : null;
+      var ent  = pickByType(path, 'enterprise');
+      var unit = pickByType(path, 'unit');
+      var folder = pickByType(path, 'folder');
+      var group = pickByType(path, 'group');
+      var sub  = pickByType(path, 'subproject');
+      var name = node ? node.name : '';
+      // 树形连接线，供各层级复用
+      var TIP_LINE = '<svg class="rg-hover-tip__tree-line" viewBox="0 0 10 20" fill="none" width="10" height="20"><path d="M5 0 v12 q0 6 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>';
+
+      // 导航入口：显示「组 + 当前资源组名」
+      if (entryCorpEl) entryCorpEl.textContent = name;
+      if (entryBadge)  entryBadge.textContent  = '组';
+
+      // hover 面板：需要根据是否在文件夹下动态调整
+      var tipEl = $('rg-hover-tip');
+      if (!tipEl) return;
+      
+      // 清空重建
+      var html = '';
+      
+      // 企业行
+      html += '<div class="rg-hover-tip__row rg-hover-tip__row--enterprise">' +
+        '<span class="rg-hover-tip__badge rg-hover-tip__badge--enterprise">企</span>' +
+        '<span class="rg-hover-tip__row-name">' + escapeHtml(ent ? ent.name : '') + '</span>' +
+        '<span class="rg-hover-tip__sub-label">（企业管理权限）</span>' +
+        '</div>';
+      
+      // 结算单元行
+      html += '<div class="rg-hover-tip__row rg-hover-tip__row--unit">' +
+        '<span class="rg-hover-tip__indent rg-hover-tip__indent--1">' +
+        '<svg class="rg-hover-tip__tree-line" viewBox="0 0 10 20" fill="none" width="10" height="20"><path d="M5 0 v12 q0 6 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>' +
+        '</span>' +
+        '<span class="rg-hover-tip__badge rg-hover-tip__badge--unit">结</span>' +
+        '<span class="rg-hover-tip__row-name">' + escapeHtml(unit ? unit.name : '') + '</span>' +
+        '</div>';
+      
+      // 如果在文件夹下，显示文件夹行
+      if (folder) {
+        html += '<div class="rg-hover-tip__row rg-hover-tip__row--folder">' +
+          '<span class="rg-hover-tip__indent rg-hover-tip__indent--2">' +
+          '<svg class="rg-hover-tip__tree-line" viewBox="0 0 10 20" fill="none" width="10" height="20"><path d="M5 0 v12 q0 6 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>' +
+          '</span>' +
+          '<span class="rg-hover-tip__badge rg-hover-tip__badge--folder">夹</span>' +
+          '<span class="rg-hover-tip__row-name">' + escapeHtml(folder.name) + '</span>' +
+          '</div>';
+      }
+      
+      // 资源组行：在文件夹下时再缩进一层
+      var groupLv = folder ? 3 : 2;
+      html += '<div class="rg-hover-tip__row rg-hover-tip__row--group">' +
+        '<span class="rg-hover-tip__indent rg-hover-tip__indent--' + groupLv + '">' + TIP_LINE + '</span>' +
+        '<span class="rg-hover-tip__badge rg-hover-tip__badge--group">组</span>' +
+        '<span class="rg-hover-tip__row-name">' + escapeHtml(group ? group.name : name) + '</span>' +
+        '<a class="rg-hover-tip__mgr" href="#" tabindex="-1">去管理</a>' +
+        '</div>';
+
+      // 子项目行：选中的是子项目时，在资源组下再缩进一层展示
+      if (sub) {
+        html += '<div class="rg-hover-tip__row rg-hover-tip__row--subproject">' +
+          '<span class="rg-hover-tip__indent rg-hover-tip__indent--' + (groupLv + 1) + '">' + TIP_LINE + '</span>' +
+          '<span class="rg-hover-tip__badge rg-hover-tip__badge--subproject">子</span>' +
+          '<span class="rg-hover-tip__row-name">' + escapeHtml(sub.name) + '</span>' +
+          '</div>';
+      }
+
+      tipEl.innerHTML = html;
+    }
+    syncEntryLabel();
+
+    /* ---- 渲染最近浏览 ---- */
+    function renderRecent(keyword) {
+      recentList.innerHTML = '';
+      recentIds.forEach(function (id) {
+        var node = findNode(TREE, id);
+        if (!node) return;
+        if (keyword && node.name.indexOf(keyword) === -1) return;
+        var el = document.createElement('span');
+        el.className = 'rg-recent__item' + (id === activeId ? ' is-active' : '');
+        el.textContent = node.name;
+        el.setAttribute('data-id', id);
+        el.addEventListener('click', function () { selectGroup(id); });
+        recentList.appendChild(el);
+      });
+    }
+
+    /* ---- 渲染树形列表 ---- */
+    function renderTree(keyword) {
+      modalBody.innerHTML = '';
+      var kw = (keyword || '').trim().toLowerCase();
+      var hasResult = false;
+
+      TREE.forEach(function (ent) {
+        // 企业标题
+        var entEl = document.createElement('div');
+        entEl.className = 'rg-tree-enterprise';
+        entEl.textContent = ent.name;
+        modalBody.appendChild(entEl);
+
+        ent.children.forEach(function (unit) {
+          // 结算单元
+          var unitEl = document.createElement('div');
+          unitEl.className = 'rg-tree-unit';
+          unitEl.textContent = unit.name;
+
+          // 搜索时，如果该结算单元下没有匹配项则跳过
+          var unitGroups = collectGroups(unit.children);
+          var matched = kw ? unitGroups.filter(function (g) { return g.name.toLowerCase().indexOf(kw) > -1; }) : unitGroups;
+          if (kw && matched.length === 0) return;
+
+          modalBody.appendChild(unitEl);
+          hasResult = true;
+
+          // 渲染子节点
+          renderChildren(unit.children, kw, modalBody);
+        });
+      });
+
+      if (!hasResult) {
+        var empty = document.createElement('div');
+        empty.className = 'rg-no-result';
+        empty.textContent = '没有找到匹配的资源组';
+        modalBody.appendChild(empty);
+      }
+    }
+
+    function renderChildren(nodes, kw, container) {
+      nodes.forEach(function (node) {
+        if (node.type === 'folder') {
+          var matched = collectGroups(node.children).filter(function (g) {
+            return !kw || g.name.toLowerCase().indexOf(kw) > -1;
+          });
+          if (kw && matched.length === 0) return;
+
+          var folderEl = document.createElement('div');
+          folderEl.className = 'rg-tree-folder is-open';
+          folderEl.innerHTML =
+            '<svg class="rg-tree-folder__icon" viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M2 5a2 2 0 012-2h2.5l1.5 2H12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2V5z" stroke="currentColor" stroke-width="1.2"/></svg>' +
+            '<span class="rg-tree-folder__name">' + escapeHtml(node.name) + '</span>' +
+            '<svg class="rg-tree-folder__arrow" viewBox="0 0 12 12" fill="none" width="10" height="10"><path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          container.appendChild(folderEl);
+
+          var folderContent = document.createElement('div');
+          folderContent.className = 'rg-tree-folder-content';
+          container.appendChild(folderContent);
+
+          folderEl.addEventListener('click', function () {
+            var isOpen = folderEl.classList.toggle('is-open');
+            folderContent.hidden = !isOpen;
+          });
+
+          renderChildren(node.children, kw, folderContent);
+
+        } else if (node.type === 'group') {
+          if (kw && node.name.toLowerCase().indexOf(kw) === -1) return;
+
+          var isActive = node.id === activeId;
+          var groupEl = document.createElement('div');
+          groupEl.className = 'rg-tree-group' + (isActive ? ' is-active' : '');
+          groupEl.innerHTML =
+            '<span class="rg-tree-group__badge">组</span>' +
+            '<span class="rg-tree-group__name">' + escapeHtml(node.name) + '</span>' +
+            '<a class="rg-tree-group__mgr" href="#" tabindex="-1">资源组管理</a>' +
+            (isActive ? '<svg class="rg-tree-group__check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="var(--primary-color)"/><path d="M5 8.5l2 2 4-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '');
+          groupEl.setAttribute('data-id', node.id);
+
+          groupEl.addEventListener('click', function (e) {
+            if (e.target.classList.contains('rg-tree-group__mgr')) return;
+            selectGroup(node.id);
+          });
+
+          container.appendChild(groupEl);
+
+          // 子项目：一行放两个，用 wrapper 包裹
+          if (node.children && node.children.length && !kw) {
+            var spWrapper = document.createElement('div');
+            spWrapper.className = 'rg-tree-subproject-row';
+            node.children.forEach(function (sp) {
+              var spEl = document.createElement('div');
+              spEl.className = 'rg-tree-subproject' + (sp.id === activeId ? ' is-active' : '');
+              spEl.innerHTML =
+                '<span class="rg-tree-subproject__dot"></span>' +
+                '<span class="rg-tree-subproject__name">' + escapeHtml(sp.name) + '</span>';
+              spEl.setAttribute('data-id', sp.id);
+              spEl.addEventListener('click', function () { selectGroup(sp.id); });
+              spWrapper.appendChild(spEl);
+            });
+            container.appendChild(spWrapper);
+          }
+        }
+      });
+    }
+
+    /* ---- 选中资源组 ---- */
+    function selectGroup(id) {
+      activeId = id;
+      // 更新最近浏览（保持不超过 8 条，当前选中移到最前）
+      var idx = recentIds.indexOf(id);
+      if (idx > -1) recentIds.splice(idx, 1);
+      recentIds.unshift(id);
+      if (recentIds.length > 8) recentIds.length = 8;
+
+      syncEntryLabel();
+      closeModal();
+    }
+
+    /* ---- 打开 / 关闭弹框 ---- */
+    function openModal() {
+      overlay.hidden = false;
+      btn.classList.add('is-open');
+      if (entry) entry.classList.add('modal-open');
+      btn.setAttribute('aria-expanded', 'true');
+      renderRecent('');
+      renderTree('');
+      if (searchInput) { searchInput.value = ''; searchInput.focus(); }
+    }
+
+    function closeModal() {
+      overlay.hidden = true;
+      btn.classList.remove('is-open');
+      if (entry) entry.classList.remove('modal-open');
+      btn.setAttribute('aria-expanded', 'false');
+      renderRecent('');
+      renderTree('');
+    }
+
+    /* ---- 事件绑定 ---- */
+    btn.addEventListener('click', function () {
+      if (overlay.hidden) { openModal(); } else { closeModal(); }
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeModal);
+    }
+
+    // 点击遮罩层关闭
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeModal();
+    });
+
+    // ESC 关闭
+    document.addEventListener('keydown', function (e) {
+      if (!overlay.hidden && (e.key === 'Escape' || e.keyCode === 27)) closeModal();
+    });
+
+    // 搜索过滤
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        var kw = searchInput.value.trim();
+        renderRecent(kw);
+        renderTree(kw);
+      });
+    }
+
+    // 企业选择器（预留多企业扩展）
+    var corpSelect = $('rg-corp-select');
+    var corpDropdown = $('rg-corp-dropdown');
+    if (corpSelect && corpDropdown) {
+      corpSelect.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = corpDropdown.hidden;
+        corpDropdown.hidden = !isOpen;
+        corpSelect.classList.toggle('is-open', isOpen);
+      });
+      document.addEventListener('click', function () {
+        corpDropdown.hidden = true;
+        corpSelect.classList.remove('is-open');
+      });
+      corpDropdown.querySelectorAll('.rg-corp-option').forEach(function (opt) {
+        opt.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var name = opt.textContent.replace(/\s+/g, ' ').trim().replace(' ✓', '').replace(/[\u2713]/, '').trim();
+          if (corpNameEl)  corpNameEl.textContent  = opt.querySelector('.rg-corp-badge') ? opt.textContent.replace(opt.querySelector('.rg-corp-badge').textContent, '').trim() : name;
+          corpDropdown.hidden = true;
+          corpSelect.classList.remove('is-open');
+        });
+      });
+    }
+
+    // 初始渲染
+    renderRecent('');
+    renderTree('');
+  }
+
+  initRgSwitchModal();
+
 })();
