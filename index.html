@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>结算单元 - 访问控制 - 360智汇云</title>
-  <link rel="stylesheet" href="shared/base.css?v=20260919a">
-  <link rel="stylesheet" href="styles.css?v=20260919a">
+  <link rel="stylesheet" href="shared/base.css?v=20261026b">
+  <link rel="stylesheet" href="styles.css?v=20261026b">
 </head>
 
 <body>
@@ -115,6 +115,11 @@
         <a class="header-link" href="#">工单</a>
         <a class="header-link" href="#">消息<span class="badge">32</span></a>
         <a class="header-link" href="#">帮助</a>
+        <!-- 未绑定手机号提示（头像下方）：点击打开个人信息页；绑定后隐藏 -->
+        <button class="phone-remind" id="phone-remind" type="button">
+          <svg viewBox="0 0 14 14" fill="none" width="12" height="12"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 3.8v3.8M7 9.6v.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span>请完善手机号信息</span>
+        </button>
         <div class="user-info">
           <div class="avatar">
             <svg viewBox="0 0 16 16" fill="none" width="16" height="16">
@@ -129,6 +134,70 @@
           <svg class="user-arrow" viewBox="0 0 12 12" fill="none">
             <path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
+
+          <!-- 头像 hover 下拉框 -->
+          <div class="user-dropdown" role="menu" aria-label="账号菜单">
+            <div class="ud-panel">
+              <div class="ud-head">
+                <div class="ud-avatar">
+                  <svg viewBox="0 0 16 16" fill="none" width="18" height="18">
+                    <circle cx="8" cy="5.5" r="2.75" fill="currentColor" />
+                    <path d="M2.75 13.5c0-2.4 2.35-3.75 5.25-3.75s5.25 1.35 5.25 3.75z" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="ud-name">lujingbao</span>
+              </div>
+              <div class="ud-info">
+                <div class="ud-info-row"><span class="ud-label">当前身份：</span><span>lujingbao</span><span class="ud-tag">子账号</span></div>
+                <div class="ud-info-row"><span class="ud-label">当前企业：</span><span>360集团</span></div>
+                <div class="ud-info-row"><span class="ud-label">主账号ID：</span><span>3375852737</span></div>
+              </div>
+              <div class="ud-menu">
+                <a class="ud-item" id="ud-profile" href="#" role="menuitem">
+                  <svg class="ud-ico" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5.2" r="2.4" stroke="currentColor" stroke-width="1.2"/><path d="M1.8 13.5c0-2.3 1.9-3.9 4.2-3.9s4.2 1.6 4.2 3.9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M10.5 4h4M10.5 6.8h4M12 9.6h2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                  <span>个人信息</span>
+                  <span class="ud-badge">本期改动</span>
+                  <svg class="ud-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <a class="ud-item" href="#" role="menuitem">
+                  <svg class="ud-ico" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5.2" r="2.4" stroke="currentColor" stroke-width="1.2"/><path d="M1.8 13.5c0-2.3 1.9-3.9 4.2-3.9s4.2 1.6 4.2 3.9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M10.4 3.2a2.4 2.4 0 010 4.4M12 9.9c1.3.5 2.2 1.8 2.2 3.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                  <span>组织管理</span>
+                  <svg class="ud-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <a class="ud-item" href="#" role="menuitem">
+                  <svg class="ud-ico" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="1.8" width="11" height="12.4" rx="1.2" stroke="currentColor" stroke-width="1.2"/><path d="M5.2 5h5.6M5.2 7.6h3.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="10.6" cy="10.6" r="2.6" fill="#fff" stroke="currentColor" stroke-width="1.2"/><path d="M9.4 10.6l1 1 1.4-1.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span>结算单元</span>
+                  <svg class="ud-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <a class="ud-item" href="#" role="menuitem">
+                  <svg class="ud-ico" viewBox="0 0 16 16" fill="none"><rect x="2.2" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2"/><rect x="6.7" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2"/><rect x="11.2" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2"/></svg>
+                  <span>资源组管理</span>
+                  <svg class="ud-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <a class="ud-item" href="#" role="menuitem">
+                  <svg class="ud-ico" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="4" rx="5.2" ry="2" stroke="currentColor" stroke-width="1.2"/><path d="M2.8 4v8c0 1.1 2.3 2 5.2 2s5.2-.9 5.2-2V4" stroke="currentColor" stroke-width="1.2"/><path d="M2.8 8c0 1.1 2.3 2 5.2 2s5.2-.9 5.2-2" stroke="currentColor" stroke-width="1.2"/></svg>
+                  <span>资源管理</span>
+                  <svg class="ud-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <a class="ud-item" href="#" role="menuitem">
+                  <svg class="ud-ico" viewBox="0 0 16 16" fill="none"><rect x="2.2" y="2.5" width="11.6" height="3.4" rx="0.8" stroke="currentColor" stroke-width="1.2"/><rect x="2.2" y="7.2" width="11.6" height="3.4" rx="0.8" stroke="currentColor" stroke-width="1.2"/><path d="M2.2 13h11.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                  <span>权限管理</span>
+                  <svg class="ud-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <a class="ud-item" href="#" role="menuitem">
+                  <svg class="ud-ico" viewBox="0 0 16 16" fill="none"><circle cx="5.4" cy="10.6" r="2.9" stroke="currentColor" stroke-width="1.2"/><path d="M7.5 8.5l5.6-5.6M10.4 5.6l1.5 1.5M12 4l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                  <span>密钥管理</span>
+                  <svg class="ud-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <a class="ud-item" href="#" role="menuitem">
+                  <svg class="ud-ico" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="2.6" stroke="currentColor" stroke-width="1.2"/><path d="M6.6 7.4L6 10H3.2a1 1 0 00-1 1v1.2h11.6V11a1 1 0 00-1-1H10l-.6-2.6M2.2 14h11.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span>操作审计</span>
+                  <svg class="ud-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+              </div>
+              <a class="ud-logout" id="ud-logout" href="#" role="menuitem">退出登录</a>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -422,6 +491,91 @@
       </div>
     </div>
 
+    <!-- ============ 个人信息 · 账户信息页（点击头像下拉「个人信息」进入） ============ -->
+    <div class="profile-page" id="profile-page" hidden>
+      <aside class="sidebar">
+        <div class="sidebar-title">个人信息</div>
+        <div class="menu menu-flat">
+          <div class="pf-menu-link active" data-profile-tab="account">
+            <svg class="menu-ico" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="5.2" r="2.7" stroke="currentColor" stroke-width="1.2" />
+              <path d="M2.8 14c0-2.6 2.3-4.4 5.2-4.4s5.2 1.8 5.2 4.4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+            </svg>
+            <span>账户信息</span>
+          </div>
+          <div class="pf-menu-link" data-profile-tab="message">
+            <svg class="menu-ico" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2.2a5.8 5.8 0 00-5.1 8.6L2.2 13.8l3-.7A5.8 5.8 0 108 2.2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+              <path d="M5.4 6.6h5.2M5.4 9.2h3.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+            <span>消息通知</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <div class="page-title-bar profile-title-bar">
+          <h1 class="page-title profile-page-title">账户信息</h1>
+          <a class="page-title-doc" href="#">帮助文档</a>
+        </div>
+        <div class="content-body">
+          <!-- 基本信息 -->
+          <section class="pf-card">
+            <h2 class="pf-card-hd">基本信息</h2>
+            <div class="pf-card-bd pf-basic">
+              <div class="pf-avatar">
+                <svg viewBox="0 0 24 24" fill="none" width="30" height="30">
+                  <circle cx="12" cy="8.2" r="4" fill="currentColor" />
+                  <path d="M4 20.5c0-3.8 3.6-6.2 8-6.2s8 2.4 8 6.2c0 .5-.4.9-.9.9H4.9a.9.9 0 01-.9-.9z" fill="currentColor" />
+                </svg>
+              </div>
+              <dl class="pf-kv">
+                <div class="pf-kv-row"><dt>账号昵称</dt><dd>lujingbao</dd></div>
+                <div class="pf-kv-row"><dt>账号ID</dt><dd>lujingbao</dd></div>
+              </dl>
+            </div>
+          </section>
+
+          <div class="pf-grid">
+            <!-- 手机绑定 -->
+            <section class="pf-card">
+              <h2 class="pf-card-hd">
+                <span>手机绑定</span>
+                <button class="pf-card-edit" id="pf-phone-edit" type="button">
+                  <svg viewBox="0 0 14 14" fill="none" width="14" height="14"><path d="M2 12h10M3.2 9.2l6.4-6.4 1.6 1.6-6.4 6.4H3.2V9.2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+                  <span>编辑</span>
+                </button>
+              </h2>
+              <div class="pf-card-bd pf-bind">
+                <svg class="pf-bind-ico" viewBox="0 0 28 28" fill="none">
+                  <rect x="8" y="3.5" width="12" height="21" rx="1.5" stroke="currentColor" stroke-width="1.3" />
+                  <path d="M12.5 21h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+                </svg>
+                <div class="pf-bind-meta">
+                  <div class="pf-bind-val is-empty" id="pf-phone-val">暂无绑定</div>
+                  <div class="pf-bind-desc">手机号可用于接收服务信息、第二登录方式等</div>
+                </div>
+              </div>
+            </section>
+            <!-- 邮箱绑定 -->
+            <section class="pf-card">
+              <h2 class="pf-card-hd">邮箱绑定</h2>
+              <div class="pf-card-bd pf-bind">
+                <svg class="pf-bind-ico" viewBox="0 0 28 28" fill="none">
+                  <rect x="3" y="6.5" width="22" height="15" rx="1" stroke="currentColor" stroke-width="1.3" />
+                  <path d="M3.5 7.5L14 15.5l10.5-8" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+                </svg>
+                <div class="pf-bind-meta">
+                  <div class="pf-bind-val">lujingbao@360.cn</div>
+                  <div class="pf-bind-desc">可用于重置密码和接收重要通知</div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+
     <!-- ============ 主体 ============ -->
     <div class="container" id="main-container">
       <!-- 左侧图标栏 -->
@@ -555,7 +709,6 @@
               <rect x="11.2" y="2.5" width="2.6" height="11" stroke="currentColor" stroke-width="1.2" />
             </svg>
             <span>资源组管理</span>
-            <span class="menu-badge">本期改动</span>
           </div>
           <div class="menu-link">
             <svg class="menu-ico" viewBox="0 0 16 16" fill="none">
@@ -1058,6 +1211,45 @@
       </div>
     </div>
 
+    <!-- ============ 绑定手机号弹窗 ============ -->
+    <div class="modal-mask" id="phone-mask" hidden>
+      <div class="modal modal-phone" role="dialog" aria-label="绑定手机号">
+        <div class="modal-header">
+          <span class="modal-title" id="phone-modal-title">绑定手机号</span>
+          <button class="drawer-close" id="phone-close" type="button" aria-label="关闭">
+            <svg viewBox="0 0 14 14" fill="none">
+              <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <label class="form-label required" for="phone-input">手机号</label>
+            <div class="form-control">
+              <input type="tel" id="phone-input" class="form-input" maxlength="11" placeholder="请输入11位手机号" autocomplete="off">
+            </div>
+          </div>
+          <div class="form-error" id="phone-input-error" hidden></div>
+          <div class="form-row">
+            <label class="form-label required" for="phone-code">验证码</label>
+            <div class="form-control phone-code-ctrl">
+              <input type="text" id="phone-code" class="form-input" maxlength="6" placeholder="请输入6位短信验证码" autocomplete="off">
+              <button class="btn-default phone-code-btn" id="phone-code-btn" type="button">获取验证码</button>
+            </div>
+          </div>
+          <div class="form-error" id="phone-code-error" hidden></div>
+          <div class="form-row form-row-sub">
+            <span class="form-label"></span>
+            <p class="form-hint form-control" id="phone-code-hint">验证码将发送至上方手机号，60 秒后可重新获取。</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-default" id="phone-cancel" type="button">取消</button>
+          <button class="btn-primary" id="phone-confirm" type="button">确定绑定</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ============ Toast ============ -->
     <div class="toast" id="toast" hidden>
       <svg class="toast-ico" viewBox="0 0 16 16" fill="none">
@@ -1068,7 +1260,136 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260918a"></script>
+  <!-- ============ 官网首页（点击「退出登录」后展示） ============ -->
+  <div class="site-page" id="site-page" hidden>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="site-logo" href="#" aria-label="360智汇云">
+          <svg class="site-logo__mark" viewBox="0 0 40 32" fill="none" aria-hidden="true">
+            <path d="M11 26a8 8 0 01-1.2-15.9A11 11 0 0131 9.5a8.3 8.3 0 01-1 16.5H11z" stroke="#1E88FF" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M14 18.5a6 6 0 0111.5-2.2" stroke="#17C3B2" stroke-width="3" stroke-linecap="round"/>
+            <path d="M26 18.5a6 6 0 01-11.5 2.2" stroke="#1E88FF" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <span class="site-logo__text">360智汇云</span>
+          <span class="site-logo__slogan">汇云聚智<br>随需而动</span>
+        </a>
+        <nav class="site-nav">
+          <a href="#" class="site-nav__item">产品<svg viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a href="#" class="site-nav__item">解决方案<svg viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a href="#" class="site-nav__item">帮助支持</a>
+          <a href="#" class="site-nav__item">技术社区</a>
+          <a href="#" class="site-nav__item">关于我们</a>
+        </nav>
+        <div class="site-header__right">
+          <a href="#" class="site-console" id="site-console">控制台</a>
+          <div class="site-login-wrap" id="site-login-wrap">
+            <button type="button" class="site-login" id="site-login">登录</button>
+            <button type="button" class="site-login-arrow" id="site-login-arrow" aria-label="更多登录方式" aria-haspopup="menu" aria-expanded="false">
+              <svg viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="site-login-menu" id="site-login-menu" role="menu" hidden>
+              <a href="#" class="site-login-menu__item" id="site-login-phone" role="menuitem">
+                <svg viewBox="0 0 16 16" fill="none"><rect x="4.5" y="1.5" width="7" height="13" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M7 12.5h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                <span>手机号登录</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 手机号登录弹窗（第二登录方式） -->
+    <div class="modal-mask" id="sl-mask" hidden>
+      <div class="modal modal-phone" role="dialog" aria-label="手机号登录">
+        <div class="modal-header">
+          <span class="modal-title">手机号登录</span>
+          <button class="drawer-close" id="sl-close" type="button" aria-label="关闭">
+            <svg viewBox="0 0 14 14" fill="none">
+              <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="sl-notice">
+            <svg class="sl-notice__ico" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2" />
+              <path d="M8 4.8v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+              <circle cx="8" cy="11" r=".8" fill="currentColor" />
+            </svg>
+            <p>手机号登录作为第二登录方式，仅用于网站异常的情况下的登录方式。通过手机号登录后，读取缓存的数据(如权限、成员、组织等)，可能会更新不及时。此外，通过手机号登录后，新增的授权等数据不会同步更新。</p>
+          </div>
+          <div class="form-row">
+            <label class="form-label required" for="sl-phone">手机号</label>
+            <div class="form-control">
+              <input type="tel" id="sl-phone" class="form-input" maxlength="11" placeholder="请输入已绑定账号的手机号" autocomplete="off">
+            </div>
+          </div>
+          <div class="form-error" id="sl-phone-error" hidden></div>
+          <div class="form-row">
+            <label class="form-label required" for="sl-code">验证码</label>
+            <div class="form-control phone-code-ctrl">
+              <input type="text" id="sl-code" class="form-input" maxlength="6" placeholder="请输入6位短信验证码" autocomplete="off">
+              <button class="btn-default phone-code-btn" id="sl-code-btn" type="button">获取验证码</button>
+            </div>
+          </div>
+          <div class="form-error" id="sl-code-error" hidden></div>
+          <div class="form-row form-row-sub">
+            <span class="form-label"></span>
+            <p class="form-hint form-control" id="sl-code-hint">验证码将发送至上方手机号，60 秒后可重新获取。</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-default" id="sl-cancel" type="button">取消</button>
+          <button class="btn-primary" id="sl-confirm" type="button">登录</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="site-banner">
+      <div class="site-banner__art" aria-hidden="true">
+        <div class="art-grid"></div>
+        <div class="art-platform">
+          <div class="art-ring art-ring--outer"></div>
+          <div class="art-ring art-ring--inner"></div>
+          <div class="art-box">
+            <svg viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="22" fill="#fff" fill-opacity=".85"/><path d="M25 20l15 10-15 10z" fill="#3D7BFF"/></svg>
+          </div>
+        </div>
+        <div class="art-cloud"></div>
+        <div class="art-cube art-cube--1"></div>
+        <div class="art-cube art-cube--2"></div>
+        <div class="art-ball art-ball--1"></div>
+        <div class="art-ball art-ball--2"></div>
+      </div>
+      <div class="site-banner__inner">
+        <div class="site-slide is-active" data-idx="0">
+          <h2 class="site-banner__title">幕印企业学堂 免费试用</h2>
+          <p class="site-banner__desc">快速创造属于自己的直播店铺</p>
+        </div>
+        <div class="site-slide" data-idx="1">
+          <h2 class="site-banner__title">云服务器 新用户特惠</h2>
+          <p class="site-banner__desc">稳定可靠、弹性伸缩的云端计算服务</p>
+        </div>
+        <div class="site-slide" data-idx="2">
+          <h2 class="site-banner__title">对象存储 海量低成本</h2>
+          <p class="site-banner__desc">安全、高可用的海量数据存储方案</p>
+        </div>
+        <div class="site-slide" data-idx="3">
+          <h2 class="site-banner__title">智汇云 AI 大模型平台</h2>
+          <p class="site-banner__desc">一站式模型训练、推理与应用开发</p>
+        </div>
+        <a href="#" class="site-banner__btn">了解详情</a>
+      </div>
+      <div class="site-dots" id="site-dots">
+        <button type="button" class="site-dot" data-idx="0" aria-label="第1张"></button>
+        <button type="button" class="site-dot is-active" data-idx="1" aria-label="第2张"></button>
+        <button type="button" class="site-dot" data-idx="2" aria-label="第3张"></button>
+        <button type="button" class="site-dot" data-idx="3" aria-label="第4张"></button>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js?v=20261026b"></script>
 </body>
 
 </html>
