@@ -760,8 +760,13 @@
     if (!pane.getAttribute('data-layout')) pane.setAttribute('data-layout', 'h');
   })();
 
-  // 账号绑定的手机号：账户信息页写入，官网手机号登录读取
-  var phoneBinding = { phone: '' };
+  // 账号绑定的手机号及第二登录密码：账户信息页写入，官网第二登录读取
+  var phoneBinding = { phone: '', pwd: '' };
+  // 密码规则：不少于 8 位，同时包含大写字母、小写字母、数字
+  var PWD_RULE_TIP = '密码不少于8位，须同时包含大写字母、小写字母和数字';
+  function checkPwdRule(v) {
+    return v.length >= 8 && /[a-z]/.test(v) && /[A-Z]/.test(v) && /\d/.test(v);
+  }
 
   /* ==========================================================
      退出登录：展示官网首页；点「控制台」/「登录」返回控制台
@@ -834,9 +839,11 @@
     var HINT_DEFAULT = '验证码将发送至上方手机号，60 秒后可重新获取。';
     var slMask = $('sl-mask');
     var slPhone = $('sl-phone');
+    var slPwd = $('sl-pwd');
     var slCode = $('sl-code');
     var slCodeBtn = $('sl-code-btn');
     var slErrPhone = $('sl-phone-error');
+    var slErrPwd = $('sl-pwd-error');
     var slErrCode = $('sl-code-error');
     var slHint = $('sl-code-hint');
     var slSentCode = null;         // 最近一次下发的验证码
@@ -881,10 +888,20 @@
       return true;
     }
 
+    function validateSlPwd() {
+      var v = slPwd.value;
+      if (!v) { setErr(slPwd, slErrPwd, '请输入密码'); return false; }
+      if (!checkPwdRule(v)) { setErr(slPwd, slErrPwd, PWD_RULE_TIP); return false; }
+      setErr(slPwd, slErrPwd, '');
+      return true;
+    }
+
     function openSlModal() {
       slPhone.value = '';
+      slPwd.value = '';
       slCode.value = '';
       setErr(slPhone, slErrPhone, '');
+      setErr(slPwd, slErrPwd, '');
       setErr(slCode, slErrCode, '');
       slHint.textContent = HINT_DEFAULT;
       renderSlCodeBtn(); // 倒计时跨弹框保留，防止关闭重开绕过 60s 限制
@@ -902,6 +919,8 @@
     });
     slPhone.addEventListener('blur', function () { if (slPhone.value) validateSlPhone(); });
     slPhone.addEventListener('input', function () { if (!slErrPhone.hidden) validateSlPhone(); });
+    slPwd.addEventListener('blur', function () { if (slPwd.value) validateSlPwd(); });
+    slPwd.addEventListener('input', function () { if (!slErrPwd.hidden) validateSlPwd(); });
     slCode.addEventListener('input', function () { if (!slErrCode.hidden) setErr(slCode, slErrCode, ''); });
 
     slCodeBtn.addEventListener('click', function () {
@@ -915,18 +934,21 @@
     });
 
     $('sl-confirm').addEventListener('click', function () {
-      if (!validateSlPhone()) return;
+      var okPhone = validateSlPhone();
+      var okPwd = validateSlPwd();
+      if (!okPhone || !okPwd) return;
       var phone = slPhone.value.trim();
       var code = slCode.value.trim();
       if (!code) { setErr(slCode, slErrCode, '请输入短信验证码'); return; }
       if (!slSentCode) { setErr(slCode, slErrCode, '请先获取验证码'); return; }
       if (phone !== slSentPhone) { setErr(slCode, slErrCode, '手机号与验证码不匹配，请重新获取验证码'); return; }
       if (code !== slSentCode) { setErr(slCode, slErrCode, '验证码错误，请重新输入'); return; }
-      // 验证码匹配后，还需手机号已绑定账号才可登录
+      // 三项认证：手机号已绑定 + 密码匹配 + 验证码正确
       if (phone !== phoneBinding.phone) { setErr(slPhone, slErrPhone, '该手机号未绑定任何账号，请使用账号密码登录'); return; }
+      if (slPwd.value !== phoneBinding.pwd) { setErr(slPwd, slErrPwd, '手机号或密码错误'); return; }
       slSentCode = slSentPhone = null; // 验证码一次性使用
       backToConsole();
-      toast('手机号登录成功');
+      toast('第二登录成功');
     });
 
     $('site-login-phone').addEventListener('click', function (e) {
@@ -979,9 +1001,11 @@
     var phoneEdit = $('pf-phone-edit');
     var mask = $('phone-mask');
     var inPhone = $('phone-input');
+    var inPwd = $('phone-pwd');
     var inCode = $('phone-code');
     var codeBtn = $('phone-code-btn');
     var errPhone = $('phone-input-error');
+    var errPwd = $('phone-pwd-error');
     var errCode = $('phone-code-error');
 
     function maskPhone(p) { return p.slice(0, 3) + '****' + p.slice(7); }
@@ -1029,11 +1053,21 @@
       return true;
     }
 
+    function validatePwd() {
+      var v = inPwd.value;
+      if (!v) { setErr(inPwd, errPwd, '请设置密码'); return false; }
+      if (!checkPwdRule(v)) { setErr(inPwd, errPwd, PWD_RULE_TIP); return false; }
+      setErr(inPwd, errPwd, '');
+      return true;
+    }
+
     function openPhoneModal() {
       $('phone-modal-title').textContent = boundPhone ? '修改手机号' : '绑定手机号';
       inPhone.value = '';
+      inPwd.value = '';
       inCode.value = '';
       setErr(inPhone, errPhone, '');
+      setErr(inPwd, errPwd, '');
       setErr(inCode, errCode, '');
       renderCodeBtn(); // 倒计时跨弹框保留，防止关闭重开绕过 60s 限制
       mask.hidden = false;
@@ -1050,6 +1084,8 @@
     });
     inPhone.addEventListener('blur', function () { if (inPhone.value) validatePhone(); });
     inPhone.addEventListener('input', function () { if (!errPhone.hidden) validatePhone(); });
+    inPwd.addEventListener('blur', function () { if (inPwd.value) validatePwd(); });
+    inPwd.addEventListener('input', function () { if (!errPwd.hidden) validatePwd(); });
     inCode.addEventListener('input', function () { if (!errCode.hidden) setErr(inCode, errCode, ''); });
 
     codeBtn.addEventListener('click', function () {
@@ -1063,7 +1099,9 @@
     });
 
     $('phone-confirm').addEventListener('click', function () {
-      if (!validatePhone()) return;
+      var okPhone = validatePhone();
+      var okPwd = validatePwd();
+      if (!okPhone || !okPwd) return;
       var phone = inPhone.value.trim();
       var code = inCode.value.trim();
       if (!code) { setErr(inCode, errCode, '请输入短信验证码'); return; }
@@ -1071,7 +1109,8 @@
       if (phone !== sentPhone) { setErr(inCode, errCode, '手机号与验证码不匹配，请重新获取验证码'); return; }
       if (code !== sentCode) { setErr(inCode, errCode, '验证码错误，请重新输入'); return; }
       boundPhone = phone;
-      phoneBinding.phone = phone; // 同步给官网手机号登录
+      phoneBinding.phone = phone; // 同步给官网第二登录
+      phoneBinding.pwd = inPwd.value;
       sentCode = sentPhone = null; // 验证码一次性使用
       syncPhoneState();
       closePhoneModal();
