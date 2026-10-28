@@ -113,7 +113,72 @@
         <div class="ai-entry">ai</div>
         <a class="header-link" href="#">费用</a>
         <a class="header-link" href="#">工单</a>
-        <a class="header-link" href="#">消息<span class="badge">32</span></a>
+        <!-- 待办 hover 下拉框 -->
+        <div class="msg-entry todo-entry">
+          <a class="header-link msg-trigger" href="#">待办<span class="badge" id="todo-badge">0</span><span class="nav-change-badge">本期改动</span></a>
+          <div class="msg-dropdown" role="dialog" aria-label="待办列表">
+            <div class="md-panel">
+              <div class="md-tabs">
+                <span class="md-tab is-active">待办 (<span id="todo-tab-count">0</span>)</span>
+              </div>
+              <ul class="md-list" id="md-todo-list">
+                <li class="md-empty" id="md-todo-empty" hidden>暂无待办事项</li>
+              </ul>
+              <a class="md-more" id="md-todo-more" href="#">查看更多
+                <svg viewBox="0 0 12 12" fill="none" width="12" height="12"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+        <!-- 消息 hover 下拉框（仅展示通知） -->
+        <div class="msg-entry">
+          <a class="header-link msg-trigger" href="#">消息<span class="badge">65</span><span class="nav-change-badge">本期改动</span></a>
+          <div class="msg-dropdown" role="dialog" aria-label="消息列表">
+            <div class="md-panel">
+              <div class="md-tabs" id="md-tabs">
+                <span class="md-tab is-active">通知 (65)</span>
+              </div>
+              <ul class="md-list" id="md-list">
+                <li class="md-item" data-type="notice">
+                  <div class="md-title"><i class="md-dot"></i>【产品动态】数据库告警优化及mongo预下线等相关优化上线</div>
+                  <div class="md-meta"><span class="md-tag">通知</span><span class="md-time">2026.10.26 14:23:27</span></div>
+                </li>
+                <li class="md-item" data-type="notice">
+                  <div class="md-title"><i class="md-dot"></i>【产品动态】mongodb索引增强</div>
+                  <div class="md-meta"><span class="md-tag">通知</span><span class="md-time">2026.10.20 14:10:54</span></div>
+                </li>
+                <li class="md-item" data-type="notice">
+                  <div class="md-title"><i class="md-dot"></i>【产品动态】智能体对话AIMI全新视觉交互升级</div>
+                  <div class="md-meta"><span class="md-tag">通知</span><span class="md-time">2026.10.14 21:54:13</span></div>
+                </li>
+                <li class="md-item" data-type="notice">
+                  <div class="md-title"><i class="md-dot"></i>【产品动态】数据库删除实例等优化上线</div>
+                  <div class="md-meta"><span class="md-tag">通知</span><span class="md-time">2026.10.14 11:39:01</span></div>
+                </li>
+                <li class="md-item" data-type="notice">
+                  <div class="md-title"><i class="md-dot"></i>【产品动态】API协作云新增子项目跨主项目移动功能</div>
+                  <div class="md-meta"><span class="md-tag">通知</span><span class="md-time">2026.10.12 16:32:56</span></div>
+                </li>
+                <li class="md-item" data-type="notice">
+                  <div class="md-title"><i class="md-dot"></i>【产品动态】API协作云新增子项目跨主项目移动功能</div>
+                  <div class="md-meta"><span class="md-tag">通知</span><span class="md-time">2026.10.12 16:32:55</span></div>
+                </li>
+                <li class="md-item" data-type="notice">
+                  <div class="md-title"><i class="md-dot"></i>【产品动态】API协作云新增项目目录跨项目复制功能</div>
+                  <div class="md-meta"><span class="md-tag">通知</span><span class="md-time">2026.10.12 16:31:14</span></div>
+                </li>
+                <li class="md-item" data-type="notice">
+                  <div class="md-title"><i class="md-dot"></i>【产品动态】对象存储生命周期规则支持按标签过滤</div>
+                  <div class="md-meta"><span class="md-tag">通知</span><span class="md-time">2026.10.10 10:05:42</span></div>
+                </li>
+                <li class="md-empty" id="md-empty" hidden>暂无通知</li>
+              </ul>
+              <a class="md-more" id="md-more" href="#">查看更多
+                <svg viewBox="0 0 12 12" fill="none" width="12" height="12"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
         <a class="header-link" href="#">帮助</a>
         <!-- 未绑定手机号提示（头像下方）：点击打开个人信息页；绑定后隐藏 -->
         <button class="phone-remind" id="phone-remind" type="button">
@@ -518,7 +583,7 @@
           <h1 class="page-title profile-page-title">账户信息</h1>
           <a class="page-title-doc" href="#">帮助文档</a>
         </div>
-        <div class="content-body">
+        <div class="content-body" id="pf-account-body">
           <!-- 基本信息 -->
           <section class="pf-card">
             <h2 class="pf-card-hd">基本信息</h2>
@@ -571,6 +636,59 @@
                 </div>
               </div>
             </section>
+          </div>
+        </div>
+
+        <!-- 消息通知（头像下拉 / 消息下拉「查看更多」进入） -->
+        <div class="content-body" id="pf-message-body" hidden>
+          <div class="card pm-card">
+            <div class="pm-head">
+              <div class="pm-tabs" id="pm-tabs">
+                <button class="pm-tab is-active" type="button" data-type="todo">待办</button>
+                <button class="pm-tab" type="button" data-type="notice">通知(<span id="pm-notice-count">0</span>)</button>
+              </div>
+              <div class="pm-filter" id="pm-filter">
+                <span class="pm-filter-label">完成状态</span>
+                <select id="pm-status" aria-label="完成状态">
+                  <option value="">全部</option>
+                  <option value="pending">未完成</option>
+                  <option value="done">已完成</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table pm-table">
+                <thead id="pm-thead"></thead>
+                <tbody id="pm-tbody"></tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <div class="page-summary">
+                共 <span class="num" id="pm-total">0</span> 条记录
+                第 <span class="num" id="pm-cur">1</span> / <span id="pm-pages">1</span> 页
+              </div>
+              <div class="page-controls">
+                <button class="page-btn nav" id="pm-prev" type="button" aria-label="上一页">
+                  <svg viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </button>
+                <div class="pager" id="pm-pager"></div>
+                <button class="page-btn nav" id="pm-next" type="button" aria-label="下一页">
+                  <svg viewBox="0 0 12 12" fill="none"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </button>
+                <div class="page-size">
+                  <select id="pm-size" aria-label="每页条数">
+                    <option value="10">10 条/页</option>
+                    <option value="20">20 条/页</option>
+                    <option value="50">50 条/页</option>
+                  </select>
+                </div>
+                <div class="page-jump">
+                  <span>跳至</span>
+                  <input type="text" id="pm-jump" aria-label="跳至页码">
+                  <span>页</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -1207,6 +1325,43 @@
         <div class="modal-footer" id="confirm-footer">
           <button class="btn-default" id="confirm-cancel" type="button">取消</button>
           <button class="btn-danger" id="confirm-ok" type="button">确定移除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 待办详情抽屉（消息通知页点击待办标题 / 查看 打开） ============ -->
+    <div class="drawer-mask" id="todo-detail-mask" hidden></div>
+    <aside class="drawer todo-detail-drawer" id="todo-detail-drawer" hidden aria-label="待办详情">
+      <div class="drawer-header">
+        <span class="drawer-title" id="todo-detail-title">待办详情</span>
+        <button class="drawer-close" id="todo-detail-close" type="button" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none">
+            <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-body" id="todo-detail-body"></div>
+      <div class="todo-detail-footer" id="todo-detail-footer"></div>
+    </aside>
+
+    <!-- ============ 待办「去处理」弹窗：展示业务填写的跳转 URL ============ -->
+    <div class="modal-mask" id="todo-go-mask" hidden>
+      <div class="modal modal-todo-go" role="dialog" aria-label="去处理">
+        <div class="modal-header">
+          <span class="modal-title">去处理</span>
+          <button class="drawer-close" id="todo-go-close" type="button" aria-label="关闭">
+            <svg viewBox="0 0 14 14" fill="none">
+              <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">该待办需前往业务系统处理，跳转地址如下：</p>
+          <div class="todo-go-url" id="todo-go-url"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-default" id="todo-go-cancel" type="button">取消</button>
+          <a class="btn-primary todo-go-open" id="todo-go-open" href="#" target="_blank" rel="noopener">前往处理</a>
         </div>
       </div>
     </div>

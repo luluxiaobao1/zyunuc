@@ -176,6 +176,8 @@ body.subview .main-content {
   color: var(--text-primary);
   font-size: 14px;
   text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
   position: relative;
   cursor: pointer;
   transition: color 0.2s ease;

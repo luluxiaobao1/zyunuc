@@ -50,6 +50,478 @@
   transform: translateY(0);
 }
 
+/* ============ 消息 hover 下拉框 ============ */
+.msg-entry {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.msg-trigger {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 26px 0 12px;
+  margin: 0 -10px 0 -12px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.msg-trigger .badge {
+  top: 4px;
+  right: 2px;
+}
+
+/* 导航「待办 / 消息」本期改动标识：文字上移，标识位于文字正下方，不影响导航宽度 */
+.msg-trigger:has(.nav-change-badge) {
+  box-sizing: border-box;
+  padding-bottom: 16px;
+}
+.msg-trigger .nav-change-badge {
+  position: absolute;
+  left: 26px; /* 12px 左内边距 + 两字宽度的一半 */
+  bottom: 4px;
+  transform: translateX(-50%);
+  height: 14px;
+  line-height: 14px;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: var(--error-color);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 400;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.msg-entry:hover .msg-trigger {
+  background: #F2F4F7;
+  color: var(--primary-color);
+}
+
+.msg-dropdown {
+  position: absolute;
+  top: 100%;
+  right: -140px;
+  padding-top: 4px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+  cursor: default;
+}
+
+.msg-entry:hover .msg-dropdown,
+.msg-entry:focus-within .msg-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.md-panel {
+  width: 470px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.md-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px;
+  background: #F7F8FA;
+  border-bottom: 1px solid var(--border-light, #EEF0F3);
+}
+
+.md-tab {
+  position: relative;
+  height: 44px;
+  padding: 0 12px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.md-tab:hover { color: var(--primary-color); }
+
+/* 单一标题 Tab（待办 / 通知）：仅作标题展示，不可切换 */
+span.md-tab {
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
+}
+
+.msg-trigger .badge[hidden] { display: none; }
+
+/* 待办下拉位置：入口更靠左，面板右移以避免超出左侧 */
+.todo-entry .msg-dropdown { right: -200px; }
+
+.md-tab.is-active { color: var(--primary-color); }
+
+.md-tab.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--primary-color);
+}
+
+.md-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 16px;
+  max-height: min(560px, calc(100vh - 160px));
+  overflow-y: auto;
+}
+
+.md-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-light, #EEF0F3);
+  cursor: pointer;
+}
+
+.md-item:last-of-type { border-bottom: none; }
+
+.md-item:hover .md-title { color: var(--primary-color); }
+
+.md-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s ease;
+}
+
+.md-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--primary-color);
+}
+
+.md-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-left: 14px;
+}
+
+.md-tag {
+  height: 22px;
+  line-height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: #EEF1F5;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.md-time {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.md-empty {
+  padding: 48px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.md-empty[hidden] { display: none; }
+
+.md-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 40px;
+  border-top: 1px solid var(--border-light, #EEF0F3);
+  font-size: 14px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.md-more:hover { color: var(--primary-color); }
+
+/* 点击「查看更多」后强制收起下拉 */
+.msg-entry.is-suppressed .msg-dropdown {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+}
+
+/* 消息通知表格：窄屏下保持列宽，横向滚动 */
+.pm-card .table-wrap { overflow-x: auto; }
+.pm-table { min-width: 860px; }
+.pm-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 待办条目：卡片式，左侧圆点 + 标题/状态 + 描述 + 操作按钮（无头像） */
+.md-item--todo {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 8px 0;
+  padding: 14px 16px 14px 12px;
+  border: 1px solid var(--border-light, #EEF0F3);
+  border-radius: 6px;
+  background: #fff;
+  cursor: default;
+  transition: box-shadow 0.15s ease;
+}
+.md-item--todo:last-of-type { border-bottom: 1px solid var(--border-light, #EEF0F3); }
+.md-item--todo[hidden] { display: none; }
+.md-item--todo:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); }
+.md-item--todo.is-pending { background: #F7F9FC; }
+.md-item--todo .md-dot { margin: 7px 0 0; }
+.md-todo-body { flex: 1; min-width: 0; }
+.md-todo-head,
+.md-todo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.md-todo-row { margin-top: 8px; }
+.md-todo-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.md-todo-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.md-todo-flag {
+  flex: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+.md-todo-time {
+  flex: none;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+.md-todo-desc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.md-todo-sep {
+  width: 1px;
+  height: 10px;
+  background: #D9DDE3;
+}
+.md-todo-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+.md-status {
+  flex: none;
+  height: 20px;
+  line-height: 18px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.md-status.is-pending { background: #E6F0FF; border-color: #ADC6FF; color: var(--primary-color); }
+.md-status.is-done { background: #F0FAE6; border-color: #B7EB8F; color: var(--success-color); }
+/* 处理结果（已同意 / 已驳回）：文字色区分，不与完成状态混淆 */
+.md-result,
+.pm-result { font-size: 12px; }
+.md-result.is-approved,
+.pm-result.is-approved { color: var(--success-color); }
+.md-result.is-rejected,
+.pm-result.is-rejected { color: #F5222D; }
+.pm-result-none { color: var(--text-tertiary); }
+.md-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 12px;
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.md-btn:hover { background: #E6F0FF; }
+/* 已处理（已同意 / 已驳回）：浅灰背景体现不可点击（无悬停反馈） */
+.md-btn:disabled,
+.md-btn:disabled:hover {
+  background: #F5F5F5;
+  cursor: not-allowed;
+}
+.md-btn:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
+/* 已驳回：红色字体 + 浅红描边，与「已同意」区分 */
+.md-btn.is-rejected,
+.md-btn.is-rejected:disabled {
+  color: #F5222D;
+  border-color: #FFA39E;
+}
+
+/* 待办状态标签（下拉与列表页共用） */
+.pm-status {
+  display: inline-block;
+  height: 22px;
+  line-height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.pm-status.is-done { background: #F0FAE6; color: var(--success-color); }
+.pm-status.is-pending { background: #E6F0FF; color: var(--primary-color); }
+/* ============ 个人信息 · 消息通知页 ============ */
+.pm-card { padding-top: var(--spacing-lg); }
+.pm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-light);
+}
+.pm-tabs { display: flex; }
+.pm-tab {
+  position: relative;
+  height: 44px;
+  padding: 0 var(--spacing-lg);
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.pm-tab:hover,
+.pm-tab.is-active { color: var(--primary-color); }
+.pm-tab.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--primary-color);
+}
+.pm-filter {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  margin-bottom: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+.pm-filter[hidden] { display: none; }
+.pm-filter-label {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-md);
+  background: var(--bg-gray);
+  border-right: 1px solid var(--border-color);
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.pm-filter select {
+  width: 130px;
+  height: 100%;
+  padding: 0 28px 0 var(--spacing-md);
+  border: none;
+  background: #fff url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5L6 8.5L10 4.5' stroke='%238C9AAE' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center / 12px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.pm-table th { color: var(--text-primary); font-weight: 500; }
+.pm-empty { text-align: center; color: var(--text-tertiary); padding: 48px 0 !important; }
+/* 待办标题：可点击打开详情抽屉 */
+.pm-todo-link { color: var(--primary-color); text-decoration: none; }
+.pm-todo-link:hover { text-decoration: underline; }
+/* 操作列：与下拉待办卡片按钮一致 */
+.pm-todo-actions { display: flex; align-items: center; gap: 8px; }
+
+/* ============ 待办详情抽屉 ============ */
+.drawer.todo-detail-drawer { width: 560px; min-width: 0; }
+.td-section-hd {
+  position: relative;
+  padding-left: 10px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.td-section-hd::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--primary-color);
+}
+.td-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 0;
+  font-size: 13px;
+  line-height: 22px;
+  border-bottom: 1px dashed var(--border-light);
+}
+.td-label { flex: 0 0 88px; color: var(--text-secondary); }
+.td-val { flex: 1; min-width: 0; color: var(--text-primary); word-break: break-all; }
+.td-url { color: var(--primary-color); }
+.todo-detail-footer {
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-light);
+}
+.todo-detail-footer[hidden] { display: none; }
+
 .ud-panel {
   width: 264px;
   background: #fff;
@@ -2235,6 +2707,24 @@
   flex-direction: column;
 }
 .modal-confirm { width: 395px; }
+/* 待办「去处理」弹窗 */
+.modal-todo-go { width: 480px; }
+.todo-go-url {
+  padding: 10px 12px;
+  background: #F5F7FA;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--primary-color);
+  word-break: break-all;
+  user-select: all;
+}
+.todo-go-open {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
 .modal-header {
   height: 48px;
   display: flex;
@@ -2641,6 +3131,8 @@
 .phone-remind:hover { color: #AD4E00; border-color: #FFC069; }
 .phone-remind[hidden] { display: none; }
 /* 下拉框展开时隐藏提示，避免叠加 */
+.header-right:has(.msg-entry:hover) .phone-remind,
+.header-right:has(.msg-entry:focus-within) .phone-remind,
 .header-right:has(.user-info:hover) .phone-remind,
 .header-right:has(.user-info:focus-within) .phone-remind { visibility: hidden; }
 

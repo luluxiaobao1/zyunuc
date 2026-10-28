@@ -970,7 +970,8 @@
     var dashPage = $('dashboard-page');
     if (!page || !entry) return;
 
-    function openProfile() {
+    function openProfile(tabKey) {
+      switchProfileTab(typeof tabKey === 'string' ? tabKey : 'account');
       // 总览页打开时先收起，避免两层叠加
       if (dashPage && !dashPage.hidden) {
         document.querySelectorAll('.nav-btn').forEach(function (b) {
@@ -1131,13 +1132,29 @@
     });
 
     var tabs = page.querySelectorAll('.pf-menu-link');
+    function switchProfileTab(key) {
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-profile-tab') === key;
+        t.classList.toggle('active', on);
+        if (on) page.querySelector('.profile-page-title').textContent = t.querySelector('span').textContent;
+      });
+      var acc = $('pf-account-body');
+      var msg = $('pf-message-body');
+      if (acc) acc.hidden = key !== 'account';
+      if (msg) msg.hidden = key !== 'message';
+      if (key === 'message' && typeof profileApi.onMessageOpen === 'function') profileApi.onMessageOpen();
+    }
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () {
-        tabs.forEach(function (t) { t.classList.toggle('active', t === tab); });
-        page.querySelector('.profile-page-title').textContent = tab.querySelector('span').textContent;
+        switchProfileTab(tab.getAttribute('data-profile-tab'));
       });
     });
+
+    profileApi.open = openProfile;
   }
+
+  // 供其它模块（如消息下拉「查看更多」）打开个人信息页
+  var profileApi = { open: null, onMessageOpen: null };
 
   // 在所有初始化完成后执行
   initDashboard();
@@ -3005,5 +3022,419 @@
   }
 
   initRgSwitchModal();
+
+  /* ==========================================================
+     顶栏消息 hover 下拉框：Tab 切换（全部 / 待办 / 通知）
+     ========================================================== */
+  // 待办数据（下拉框与消息通知页共用）
+  // 完成状态只有两种：未完成 / 已完成；已同意 / 已驳回 属于「处理结果」，处理后状态均为已完成
+  var TODO_STATUS = {
+    pending: { text: '未完成', cls: 'is-pending' },
+    done: { text: '已完成', cls: 'is-done' }
+  };
+  var TODO_RESULT = {
+    approved: { text: '已同意', cls: 'is-approved' },
+    rejected: { text: '已驳回', cls: 'is-rejected' }
+  };
+  var TODO_DATA = [
+    { title: '订单结算审批', status: 'pending', user: 'yanglonghui', time: '2026-10-28 10:45:38' },
+    // url：业务方填写的跳转地址，有值时卡片按钮为「查看 / 去处理」
+    { title: '订单结算审批', status: 'pending', user: 'zhanghaojun', time: '2026-10-28 10:42:14',
+      url: 'https://billing.example.com/settlement/approve?orderId=SO20261028104214&from=msg' },
+    { title: '结算单元关联申请', status: 'done', result: 'approved', user: 'zhanghaojun', time: '2026-10-28 10:35:14' },
+    { title: '结算单元关联申请', status: 'done', result: 'rejected', user: 'yanglonghui', time: '2026-10-28 10:24:41' },
+    { title: '订单结算审批', status: 'done', result: 'approved', user: 'liuxiaowen', time: '2026-10-28 09:42:25' },
+    { title: '订单结算审批', status: 'done', result: 'approved', user: 'tianxinlong', time: '2026-10-23 20:27:53' },
+    { title: '结算单元关联申请', status: 'done', result: 'approved', user: 'liuxiaowen', time: '2026-10-23 14:52:07' },
+    { title: '订单结算审批', status: 'done', result: 'rejected', user: 'yangcailiang', time: '2026-10-23 14:22:40' },
+    { title: '结算单元关联申请', status: 'done', result: 'approved', user: 'yangcailiang', time: '2026-10-23 14:14:32' },
+    { title: '订单结算审批', status: 'done', result: 'approved', user: 'zhouna1', time: '2026-10-23 14:13:09' },
+    { title: '结算单元关联申请', status: 'done', result: 'approved', user: 'zhouna1', time: '2026-10-22 17:36:21' },
+    { title: '订单结算审批', status: 'done', result: 'approved', user: 'tianxinlong', time: '2026-10-22 11:08:56' }
+  ];
+  // 处理结果标签（未完成时为空）
+  function todoResultHtml(t, prefix) {
+    var r = t.status === 'done' && TODO_RESULT[t.result];
+    return r ? '<span class="' + prefix + '-result ' + r.cls + '">' + r.text + '</span>' : '';
+  }
+  function todoTitle(t) { return t.title + '(' + TODO_STATUS[t.status].text + ')'; }
+
+  // 待办操作按钮（下拉卡片 / 消息通知页列表 / 详情抽屉 共用，保证展示一致）
+  var MD_ICON = {
+    view: '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2.5" width="12" height="11" rx="1.5"/><path d="M5 9.5l2-2 1.5 1.5L11 6.5"/></svg>',
+    ok: '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M5.3 8.2l1.8 1.8 3.6-3.7"/></svg>',
+    no: '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="M5.5 6.5h5M5.5 9.5h3"/></svg>'
+  };
+  // 已完成：处理结果（已同意 / 已驳回）以禁用按钮形式展示
+  function todoResultAct(t) {
+    return t.handled || (t.status === 'done' ? (t.result === 'rejected' ? 'no' : 'ok') : '');
+  }
+  function todoActionsHtml(t, opts) {
+    var resultAct = todoResultAct(t);
+    var handled = resultAct === 'ok' || resultAct === 'no';
+    // 已完成时只保留对应结果按钮（已同意 / 已驳回），另一按钮不展示
+    var okBtn = resultAct === 'ok'
+      ? '<button type="button" class="md-btn is-handled" data-act="ok" disabled>' + MD_ICON.ok + '已同意</button>'
+      : handled ? '' : '<button type="button" class="md-btn" data-act="ok">' + MD_ICON.ok + '同意</button>';
+    var noBtn = resultAct === 'no'
+      ? '<button type="button" class="md-btn is-handled is-rejected" data-act="no" disabled>' + MD_ICON.no + '已驳回</button>'
+      : handled ? '' : '<button type="button" class="md-btn" data-act="no">' + MD_ICON.no + '驳回</button>';
+    var viewBtn = opts && opts.noView ? '' : '<button type="button" class="md-btn" data-act="view">' + MD_ICON.view + '查看</button>';
+    return viewBtn +
+      (t.url && !handled
+        ? '<button type="button" class="md-btn" data-act="go">' + MD_ICON.ok + '去处理</button>'
+        : okBtn + noBtn);
+  }
+  // 各处渲染的刷新钩子，由对应 init 函数注册
+  var todoApi = {
+    refreshers: [],
+    refresh: function () { this.refreshers.forEach(function (fn) { fn(); }); },
+    openGo: function () {},
+    openDetail: function () {}
+  };
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function fmtTime(d) {
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + ' ' +
+      pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  }
+  // 统一处理待办按钮动作：同意 / 驳回 / 去处理 / 查看
+  function todoAct(t, act) {
+    if (act === 'ok' || act === 'no') {
+      if (t.status === 'done') return;
+      // 同意 / 驳回 后，完成状态统一变为「已完成」，处理结果记录为 已同意 / 已驳回
+      t.handled = act;
+      t.status = 'done';
+      t.result = act === 'ok' ? 'approved' : 'rejected';
+      t.doneTime = fmtTime(new Date());
+      todoApi.refresh();
+    } else if (act === 'go') {
+      todoApi.openGo(t.url);
+    } else if (act === 'view') {
+      todoApi.openDetail(t);
+    }
+  }
+
+  // 通知数据：取下拉框中的静态通知，并补足至 65 条用于列表分页演示
+  var NOTICE_DATA = [];
+
+  /* ==========================================================
+     顶栏 hover 下拉框：待办（待办列表）/ 消息（仅通知）
+     ========================================================== */
+  function initMsgDropdown() {
+    var list = $('md-list');
+    var todoList = $('md-todo-list');
+    var todoEmpty = $('md-todo-empty');
+    if (!list || !todoList || !todoEmpty) return;
+
+    // 收集静态通知
+    list.querySelectorAll('.md-item[data-type="notice"]').forEach(function (li) {
+      var title = li.querySelector('.md-title').textContent.trim();
+      var time = li.querySelector('.md-time').textContent.trim().replace(/\./g, '-');
+      NOTICE_DATA.push({ title: title, time: time });
+    });
+    var base = NOTICE_DATA.slice();
+    var d = new Date('2026-10-09T18:20:00');
+    for (var i = 0; NOTICE_DATA.length < 65 && base.length; i++) {
+      d = new Date(d.getTime() - (26 + (i * 7) % 40) * 3600 * 1000 - (i * 137) % 3600 * 1000);
+      var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+      NOTICE_DATA.push({
+        title: base[i % base.length].title,
+        time: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+          pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
+      });
+    }
+
+    // 待办条目插入「待办」下拉列表，按时间倒序
+    function todoDesc(t) {
+      var who = t.title.indexOf('关联') > -1 ? '申请人：' : '提交人：';
+      // 处理结果已通过「已同意 / 已驳回」按钮展示，描述中不再重复展示
+      return '<span>' + who + escapeHtml(t.user) + '</span>';
+    }
+    function shortTime(s) { return s.slice(5, 16); }
+    function renderTodoItem(li, t) {
+      var st = TODO_STATUS[t.status];
+      var pending = t.status === 'pending';
+      var handled = !!todoResultAct(t);
+      var showActions = true;
+      li.className = 'md-item md-item--todo' + (pending ? ' is-pending' : '');
+      li.innerHTML =
+        '<i class="md-dot"></i>' +
+        '<div class="md-todo-body">' +
+          '<div class="md-todo-head">' +
+            '<div class="md-todo-title"><span class="md-todo-name">' + escapeHtml(t.title) + '</span>' +
+              '<span class="md-status ' + st.cls + '">' + st.text + '</span></div>' +
+            (pending ? '<span class="md-todo-flag">待我审批</span>' : handled ? '' : '<span class="md-todo-time">' + shortTime(t.time) + '</span>') +
+          '</div>' +
+          '<div class="md-todo-row">' +
+            '<div class="md-todo-desc">' + todoDesc(t) + '</div>' +
+            (showActions ? '<span class="md-todo-time">' + shortTime(t.time) + '</span>' : '<button type="button" class="md-btn" data-act="view">查看详情</button>') +
+          '</div>' +
+          (showActions
+            ? '<div class="md-todo-actions">' + todoActionsHtml(t) + '</div>'
+            : '') +
+        '</div>';
+    }
+    // 角标 / Tab 计数：待处理的待办数量
+    function updateTodoCount() {
+      var n = TODO_DATA.filter(function (t) { return t.status === 'pending'; }).length;
+      var badge = $('todo-badge');
+      if (badge) {
+        badge.textContent = n;
+        badge.hidden = n === 0;
+      }
+      if ($('todo-tab-count')) $('todo-tab-count').textContent = n;
+    }
+    var todoItems = [];
+    TODO_DATA.slice()
+      .sort(function (a, b) { return a.time < b.time ? 1 : -1; })
+      .forEach(function (t) {
+      var li = document.createElement('li');
+      li.setAttribute('data-type', 'todo');
+      li.setAttribute('data-time', t.time);
+      renderTodoItem(li, t);
+      todoItems.push({ li: li, t: t });
+      li.addEventListener('click', function (e) {
+        var btn = e.target.closest('.md-btn');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (btn.disabled) return;
+        var act = btn.getAttribute('data-act');
+        // 跳出下拉的操作（查看详情 / 去处理）先收起下拉框
+        if (act === 'go' || act === 'view') suppressDropdown(li);
+        todoAct(t, act);
+      });
+      todoList.insertBefore(li, todoEmpty);
+    });
+    todoEmpty.hidden = TODO_DATA.length > 0;
+    updateTodoCount();
+    todoApi.refreshers.push(function () {
+      todoItems.forEach(function (it) { renderTodoItem(it.li, it.t); });
+      updateTodoCount();
+    });
+
+    // 查看更多：打开个人信息 · 消息通知页，定位到对应 Tab
+    function bindMore(id, type) {
+      var more = $(id);
+      if (!more) return;
+      more.addEventListener('click', function (e) {
+        e.preventDefault();
+        msgPage.setType(type);
+        if (profileApi.open) profileApi.open('message');
+        suppressDropdown(more);
+      });
+    }
+    bindMore('md-todo-more', 'todo');
+    bindMore('md-more', 'notice');
+
+    // 点击后收起下拉框，鼠标移出入口后恢复 hover 展开
+    function suppressDropdown(el) {
+      var entry = el.closest('.msg-entry');
+      if (!entry) return;
+      entry.classList.add('is-suppressed');
+      entry.addEventListener('mouseleave', function off() {
+        entry.classList.remove('is-suppressed');
+        entry.removeEventListener('mouseleave', off);
+      });
+    }
+
+    // 「去处理」弹窗：展示业务填写的跳转 URL
+    var goMask = $('todo-go-mask');
+    function openTodoGo(url) {
+      $('todo-go-url').textContent = url;
+      $('todo-go-open').href = url;
+      goMask.hidden = false;
+    }
+    todoApi.openGo = openTodoGo;
+    function closeTodoGo() { goMask.hidden = true; }
+    $('todo-go-close').addEventListener('click', closeTodoGo);
+    $('todo-go-cancel').addEventListener('click', closeTodoGo);
+    $('todo-go-open').addEventListener('click', closeTodoGo);
+    goMask.addEventListener('click', function (e) {
+      if (e.target === goMask) closeTodoGo();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !goMask.hidden) closeTodoGo();
+    });
+  }
+
+  /* ==========================================================
+     待办详情抽屉：点击待办标题 / 「查看」按钮，从右侧打开
+     ========================================================== */
+  function initTodoDetail() {
+    var mask = $('todo-detail-mask');
+    var drawer = $('todo-detail-drawer');
+    if (!mask || !drawer) return;
+    var body = $('todo-detail-body');
+    var footer = $('todo-detail-footer');
+    var current = null;
+
+    function row(label, val) {
+      return '<div class="td-row"><span class="td-label">' + label + '</span><span class="td-val">' + val + '</span></div>';
+    }
+
+    function render() {
+      var t = current;
+      if (!t) return;
+      var st = TODO_STATUS[t.status];
+      var whoLabel = t.title.indexOf('关联') > -1 ? '申请人' : '提交人';
+      $('todo-detail-title').textContent = t.title;
+      body.innerHTML =
+        '<div class="td-section">' +
+          '<div class="td-section-hd">基本信息</div>' +
+          row('待办标题', escapeHtml(t.title)) +
+          row('完成状态', '<span class="pm-status ' + st.cls + '">' + st.text + '</span>') +
+          row('处理结果', todoResultHtml(t, 'pm') || '<span class="pm-result-none">-</span>') +
+          row(whoLabel, escapeHtml(t.user)) +
+          row('提交时间', t.time) +
+          (t.doneTime ? row('处理时间', t.doneTime) : '') +
+          (t.url ? row('跳转地址', '<span class="td-url">' + escapeHtml(t.url) + '</span>') : '') +
+        '</div>';
+      footer.innerHTML = todoActionsHtml(t, { noView: true });
+      footer.hidden = !footer.innerHTML;
+    }
+
+    function open(t) {
+      current = t;
+      render();
+      mask.hidden = false;
+      drawer.hidden = false;
+    }
+    function close() {
+      mask.hidden = true;
+      drawer.hidden = true;
+      current = null;
+    }
+
+    footer.addEventListener('click', function (e) {
+      var btn = e.target.closest('.md-btn');
+      if (!btn || btn.disabled || !current) return;
+      todoAct(current, btn.getAttribute('data-act'));
+    });
+    $('todo-detail-close').addEventListener('click', close);
+    mask.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) {
+      // 「去处理」弹窗打开时，Esc 先关闭弹窗
+      if (e.key === 'Escape' && !drawer.hidden && $('todo-go-mask').hidden) close();
+    });
+
+    todoApi.openDetail = open;
+    todoApi.refreshers.push(render);
+  }
+
+  /* ==========================================================
+     个人信息 · 消息通知页：待办 / 通知 列表 + 分页
+     ========================================================== */
+  var msgPage = { setType: function () {} };
+  function initMsgPage() {
+    var tabsEl = $('pm-tabs');
+    if (!tabsEl) return;
+    var thead = $('pm-thead');
+    var tbody = $('pm-tbody');
+    var statusSel = $('pm-status');
+    var filterEl = $('pm-filter');
+    var sizeSel = $('pm-size');
+    var state = { type: 'todo', status: '', page: 1, size: 10 };
+
+    $('pm-notice-count').textContent = NOTICE_DATA.length;
+
+    function getRows() {
+      if (state.type === 'notice') return NOTICE_DATA;
+      return TODO_DATA.filter(function (t) { return !state.status || t.status === state.status; });
+    }
+
+    function renderHead() {
+      thead.innerHTML = state.type === 'todo'
+        ? '<tr><th style="width:26%">待办标题</th><th style="width:14%">提交人</th><th style="width:11%">完成状态</th><th style="width:20%">提交时间</th><th style="width:29%">操作</th></tr>'
+        : '<tr><th style="width:52%">通知标题</th><th style="width:12%">类型</th><th style="width:22%">发送时间</th><th style="width:14%">操作</th></tr>';
+    }
+
+    function render() {
+      var rows = getRows();
+      var total = rows.length;
+      var pages = Math.max(1, Math.ceil(total / state.size));
+      if (state.page > pages) state.page = pages;
+      var start = (state.page - 1) * state.size;
+      var slice = rows.slice(start, start + state.size);
+      var cols = state.type === 'todo' ? 5 : 4;
+
+      tbody.innerHTML = slice.length ? slice.map(function (r) {
+        if (state.type === 'todo') {
+          var st = TODO_STATUS[r.status];
+          return '<tr data-idx="' + TODO_DATA.indexOf(r) + '">' +
+            '<td><a href="#" class="pm-todo-link" data-act="view">' + escapeHtml(todoTitle(r)) + '</a></td>' +
+            '<td>' + escapeHtml(r.user) + '</td>' +
+            '<td><span class="pm-status ' + st.cls + '">' + st.text + '</span></td>' +
+            '<td>' + r.time + '</td>' +
+            '<td><div class="pm-todo-actions">' + todoActionsHtml(r) + '</div></td></tr>';
+        }
+        return '<tr><td>' + escapeHtml(r.title) + '</td><td><span class="md-tag">通知</span></td>' +
+          '<td>' + r.time + '</td><td><span class="row-actions"><a href="#" data-act="view">查看</a></span></td></tr>';
+      }).join('') : '<tr><td colspan="' + cols + '" class="pm-empty">暂无数据</td></tr>';
+
+      $('pm-total').textContent = total;
+      $('pm-cur').textContent = state.page;
+      $('pm-pages').textContent = pages;
+      $('pm-prev').disabled = state.page <= 1;
+      $('pm-next').disabled = state.page >= pages;
+      var html = '';
+      for (var p = 1; p <= pages; p++) {
+        html += '<button class="page-btn' + (p === state.page ? ' active' : '') + '" type="button" data-page="' + p + '">' + p + '</button>';
+      }
+      $('pm-pager').innerHTML = html;
+    }
+
+    function setType(type) {
+      state.type = type;
+      state.page = 1;
+      tabsEl.querySelectorAll('.pm-tab').forEach(function (t) {
+        t.classList.toggle('is-active', t.getAttribute('data-type') === type);
+      });
+      filterEl.hidden = type !== 'todo';
+      renderHead();
+      render();
+    }
+
+    tabsEl.addEventListener('click', function (e) {
+      var tab = e.target.closest('.pm-tab');
+      if (tab) setType(tab.getAttribute('data-type'));
+    });
+    statusSel.addEventListener('change', function () { state.status = statusSel.value; state.page = 1; render(); });
+    sizeSel.addEventListener('change', function () { state.size = +sizeSel.value; state.page = 1; render(); });
+    $('pm-prev').addEventListener('click', function () { if (state.page > 1) { state.page--; render(); } });
+    $('pm-next').addEventListener('click', function () { state.page++; render(); });
+    $('pm-pager').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-page]');
+      if (b) { state.page = +b.getAttribute('data-page'); render(); }
+    });
+    $('pm-jump').addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var n = parseInt(this.value, 10);
+      var pages = Math.max(1, Math.ceil(getRows().length / state.size));
+      if (n >= 1 && n <= pages) { state.page = n; render(); }
+      this.value = '';
+    });
+    tbody.addEventListener('click', function (e) {
+      var el = e.target.closest('[data-act]');
+      if (!el) return;
+      e.preventDefault();
+      var tr = el.closest('tr[data-idx]');
+      if (state.type === 'todo' && tr) {
+        if (el.disabled) return;
+        todoAct(TODO_DATA[+tr.getAttribute('data-idx')], el.getAttribute('data-act'));
+      } else if (el.getAttribute('data-act') === 'view') {
+        toast('原型演示：查看详情');
+      }
+    });
+    // 待办在下拉 / 抽屉中被处理后，同步刷新列表
+    todoApi.refreshers.push(function () { if (state.type === 'todo') render(); });
+
+    msgPage.setType = setType;
+    setType('todo');
+  }
+
+  initMsgDropdown();
+  initMsgPage();
+  initTodoDetail();
 
 })();
