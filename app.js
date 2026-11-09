@@ -3437,4 +3437,585 @@
   initMsgPage();
   initTodoDetail();
 
+  /* ==========================================================
+     左侧「全部」产品与服务抽屉：从图标栏右侧向右滑出
+     ========================================================== */
+  function initAllProductsDrawer() {
+    var trigger = document.querySelector('.icon-bar .icon-item.top');
+    if (!trigger) return;
+
+    // badge: 'hot' | 'new'；fav: 是否已收藏（橙色星标）
+    var COLUMNS = [
+      [
+        { title: '智能体', items: [
+          { name: 'API市场 APIMKT', badge: 'hot' },
+          { name: 'AI沙箱 Sandbox' },
+          { name: '智能体运行 AIRUN', badge: 'new' },
+          { name: 'MCP市场 MCPMKT', badge: 'new', fav: true },
+          { name: '智能体记忆 AMS', fav: true },
+          { name: '智能体交互 AIMI', badge: 'new', fav: true }
+        ] },
+        { title: '数据库', items: [
+          { name: '云数据库 MySQL', fav: true },
+          { name: '云数据库 PGSQL', badge: 'new', fav: true },
+          { name: '分布式数据库 TiDB', fav: true },
+          { name: 'KV数据库 ZestKV (Pika)', fav: true },
+          { name: '向量数据库 Milvus', fav: true },
+          { name: '数据库 ETCD' },
+          { name: '文档数据库 MongoDB', fav: true },
+          { name: '云检索 CSS', fav: true },
+          { name: 'KV数据库 Redis' },
+          { name: '配置管理 QCM' },
+          { name: '数据迁移 DTS' }
+        ] },
+        { title: '媒体云', items: [
+          { name: '视频会议 VCS', fav: true },
+          { name: '视频直播 LIVE', fav: true },
+          { name: '视频点播 VOD', fav: true },
+          { name: '音视频通话 RTC', fav: true },
+          { name: '实时转码 MPS' }
+        ] }
+      ],
+      [
+        { title: 'Serverless', items: [
+          { name: '函数计算 FC', fav: true },
+          { name: 'API市场 APIMKT', badge: 'hot' },
+          { name: '分布式数据库 TiDB', fav: true },
+          { name: 'KV数据库 ZestKV (Pika)', fav: true },
+          { name: '对象存储 OBS' },
+          { name: '消息队列 Pulsar', fav: true },
+          { name: '消息队列 Kafka', fav: true },
+          { name: '事件总线 EB', fav: true },
+          { name: '内容分发网络 CDN', fav: true },
+          { name: 'P2P 内容分发 PCDN', fav: true },
+          { name: '云短信 SMS', fav: true },
+          { name: '内容审核 CM' },
+          { name: '应用市场 APPMKT', badge: 'new' }
+        ] },
+        { title: '大数据', items: [
+          { name: '云数仓 DLW', fav: true },
+          { name: '流计算 DSC' },
+          { name: '湖计算 DLC', fav: true },
+          { name: '数据集成 DI', badge: 'new', fav: true }
+        ] },
+        { title: '数智应用', items: [
+          { name: '云舟观测 GC', badge: 'hot', fav: true },
+          { name: '智企 ZQI', badge: 'hot' }
+        ] }
+      ],
+      [
+        { title: '计算', items: [
+          { name: '云服务器 ECS', fav: true },
+          { name: '容器实例服务 CIS', fav: true },
+          { name: '容器镜像服务 CRS', fav: true },
+          { name: 'AI沙箱 Sandbox' },
+          { name: '专有网络 VPC', fav: true },
+          { name: '负载均衡 SLB', fav: true },
+          { name: '弹性公网 EIP', fav: true },
+          { name: '域名管理 DNS', fav: true },
+          { name: '证书管理 SSL' }
+        ] },
+        { title: '存储', items: [
+          { name: '云硬盘 CDS', fav: true },
+          { name: '对象存储 OBS' },
+          { name: '文件存储 HDFS' },
+          { name: '文件系统 PoleFS', fav: true }
+        ] },
+        { title: 'AI开发', items: [
+          { name: '大模型开发 TLM', fav: true },
+          { name: 'AI开发 TAI', fav: true },
+          { name: 'AI评测 TEP', badge: 'new' },
+          { name: 'AI标注 TLP', fav: true }
+        ] }
+      ]
+    ];
+
+    var STAR_SVG = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">' +
+      '<path d="M8 1.6l1.95 3.95 4.35.63-3.15 3.07.74 4.33L8 11.53l-3.89 2.05.74-4.33L1.7 6.18l4.35-.63L8 1.6z"/></svg>';
+
+    function esc(s) {
+      return String(s).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+
+    // 构建 DOM
+    var mask = document.createElement('div');
+    mask.className = 'apd-mask';
+    var drawer = document.createElement('aside');
+    drawer.className = 'apd-drawer';
+    drawer.setAttribute('role', 'dialog');
+    drawer.setAttribute('aria-label', '产品与服务');
+    drawer.innerHTML =
+      '<div class="apd-header">' +
+        '<span class="apd-title">产品与服务</span>' +
+        '<div class="apd-search">' +
+          '<input type="text" class="apd-search-input" placeholder="名称搜索" aria-label="名称搜索">' +
+        '</div>' +
+      '</div>' +
+      '<div class="apd-body"></div>';
+    document.body.appendChild(mask);
+    document.body.appendChild(drawer);
+
+    var body = drawer.querySelector('.apd-body');
+    var input = drawer.querySelector('.apd-search-input');
+
+    function render(keyword) {
+      var kw = (keyword || '').trim().toLowerCase();
+      var html = '';
+      var total = 0;
+      COLUMNS.forEach(function (col, ci) {
+        var colHtml = '';
+        col.forEach(function (group, gi) {
+          var itemsHtml = '';
+          group.items.forEach(function (it, ii) {
+            if (kw && it.name.toLowerCase().indexOf(kw) === -1) return;
+            total++;
+            var badge = it.badge
+              ? '<sup class="apd-badge apd-badge--' + it.badge + '">' + (it.badge === 'hot' ? 'Hot' : 'New') + '</sup>'
+              : '';
+            itemsHtml +=
+              '<li class="apd-item" data-path="' + ci + '-' + gi + '-' + ii + '">' +
+                '<span class="apd-item-name" title="' + esc(it.name) + '">' +
+                  '<span class="apd-item-text">' + esc(it.name) + '</span>' + badge +
+                '</span>' +
+                '<button type="button" class="apd-star' + (it.fav ? ' is-fav' : '') + '" ' +
+                  'aria-label="' + (it.fav ? '取消收藏' : '收藏') + '" title="' + (it.fav ? '取消收藏' : '收藏') + '">' +
+                  STAR_SVG +
+                '</button>' +
+              '</li>';
+          });
+          if (itemsHtml) {
+            colHtml += '<section class="apd-group"><h4 class="apd-group-title">' + esc(group.title) +
+              '</h4><ul class="apd-list">' + itemsHtml + '</ul></section>';
+          }
+        });
+        html += '<div class="apd-col">' + colHtml + '</div>';
+      });
+      body.innerHTML = total ? '<div class="apd-cols">' + html + '</div>'
+        : '<div class="apd-empty">未找到相关产品</div>';
+    }
+
+    function open() {
+      render(input.value);
+      document.body.classList.add('apd-open');
+      trigger.classList.add('is-drawer-open');
+      setTimeout(function () { input.focus(); }, 200);
+    }
+    function close() {
+      document.body.classList.remove('apd-open');
+      trigger.classList.remove('is-drawer-open');
+    }
+    function isOpen() { return document.body.classList.contains('apd-open'); }
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      isOpen() ? close() : open();
+    });
+    mask.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && isOpen()) close();
+    });
+    input.addEventListener('input', function () { render(input.value); });
+
+    body.addEventListener('click', function (e) {
+      var star = e.target.closest('.apd-star');
+      var li = e.target.closest('.apd-item');
+      if (!li) return;
+      var p = li.getAttribute('data-path').split('-');
+      var item = COLUMNS[+p[0]][+p[1]].items[+p[2]];
+      if (star) {
+        item.fav = !item.fav;
+        star.classList.toggle('is-fav', item.fav);
+        star.setAttribute('aria-label', item.fav ? '取消收藏' : '收藏');
+        star.setAttribute('title', item.fav ? '取消收藏' : '收藏');
+        return;
+      }
+      close();
+    });
+  }
+
+  initAllProductsDrawer();
+
+  /* ==========================================================
+     左侧「工作台」hover 浮层：鼠标悬停图标时从右侧展开工作台列表
+     ========================================================== */
+  function initWorkbenchFlyout() {
+    var items = document.querySelectorAll('.icon-bar .icon-item');
+    var trigger = null;
+    for (var i = 0; i < items.length; i++) {
+      var sp = items[i].querySelector('span');
+      if (sp && sp.textContent.trim() === '工作台') { trigger = items[i]; break; }
+    }
+    if (!trigger) return;
+    trigger.classList.add('wb-trigger');
+
+    var WORKBENCHES = [
+      '智能体工作台', 'Serverless工作台', '计算工作台', '数据库工作台',
+      '存储工作台', '大数据工作台', 'AI开发工作台', '媒体云工作台'
+    ];
+
+    var panel = document.createElement('aside');
+    panel.className = 'wb-flyout';
+    panel.setAttribute('role', 'menu');
+    panel.setAttribute('aria-label', '工作台');
+    panel.innerHTML =
+      '<div class="wb-flyout-title">工作台</div>' +
+      '<ul class="wb-flyout-list">' +
+        WORKBENCHES.map(function (n) {
+          return '<li class="wb-flyout-item" role="menuitem" tabindex="-1">' + n + '</li>';
+        }).join('') +
+      '</ul>';
+    document.body.appendChild(panel);
+
+    var hideTimer = null;
+    function show() {
+      clearTimeout(hideTimer);
+      panel.classList.add('is-open');
+      trigger.classList.add('is-flyout-open');
+    }
+    function hide() {
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(function () {
+        panel.classList.remove('is-open');
+        trigger.classList.remove('is-flyout-open');
+      }, 120);
+    }
+
+    trigger.addEventListener('mouseenter', show);
+    trigger.addEventListener('mouseleave', hide);
+    panel.addEventListener('mouseenter', show);
+    panel.addEventListener('mouseleave', hide);
+    panel.addEventListener('click', function (e) {
+      var item = e.target.closest('.wb-flyout-item');
+      if (item) {
+        panel.classList.remove('is-open');
+        trigger.classList.remove('is-flyout-open');
+        agentWbApi.open(item.textContent.trim());
+      }
+    });
+  }
+
+  /* ==========================================================
+     智能体工作台页面（APIMKT · 项目列表）
+     入口：左侧「工作台」浮层 / 总览页工作台卡片中的「智能体工作台」
+     ========================================================== */
+  var agentWbApi = { open: function () {} };
+
+  function initAgentWorkbench() {
+    var ICO = {
+      model: '<path d="M8 1.8l5.6 3.1v6.2L8 14.2l-5.6-3.1V4.9L8 1.8z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M2.4 4.9L8 8l5.6-3.1M8 8v6.2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>',
+      api: '<rect x="1.8" y="2.5" width="12.4" height="11" rx="1.2" stroke="currentColor" stroke-width="1.2"/><text x="8" y="10.4" text-anchor="middle" font-size="5" font-weight="700" fill="currentColor" font-family="Arial">API</text>',
+      list: '<rect x="2" y="2.5" width="3" height="3" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="10.5" width="3" height="3" stroke="currentColor" stroke-width="1.2"/><path d="M7.5 4h6.5M7.5 8h6.5M7.5 12h6.5M2 8h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+      stat: '<rect x="1.8" y="2.2" width="12.4" height="11.6" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M4 10.5l2.6-3 2.2 1.8 3.2-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>',
+      ip: '<circle cx="6.5" cy="5" r="2.6" stroke="currentColor" stroke-width="1.2"/><path d="M1.8 14c0-2.6 2.1-4.4 4.7-4.4 1 0 1.9.3 2.6.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M10.5 10.5l3.5 3.5M14 10.5L10.5 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+      price: '<rect x="2.5" y="1.8" width="11" height="12.4" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 1.8v6l1.5-1.2 1.5 1.2v-6" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>',
+      rg: '<path d="M2 3.5h2.6v10H2zM6.7 3.5h2.6v10H6.7zM11.4 3.5H14v10h-2.6z" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 2h13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>'
+    };
+    function svg(k) { return '<svg class="awb-mi-ico" viewBox="0 0 16 16" fill="none">' + ICO[k] + '</svg>'; }
+    var ARROW = '<svg class="awb-grp-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    var AGENT_WB = '智能体工作台';
+
+    /* 各工作台菜单（原型数据） */
+    var WB_MENUS = {
+      '智能体工作台': [
+        { name: 'API市场 APIMKT', open: true, items: [
+          { k: 'model', n: '模型服务' }, { k: 'api', n: 'API服务' }, { k: 'list', n: '项目列表', active: true },
+          { k: 'stat', n: '服务使用统计' }, { k: 'ip', n: 'IP黑名单' }, { k: 'price', n: '定价和资源包' }, { k: 'rg', n: '资源组详情' }
+        ] },
+        { name: 'AI沙箱 Sandbox', items: [{ k: 'list', n: '沙箱列表' }, { k: 'stat', n: '使用统计' }] },
+        { name: '智能体运行 AIRUN', items: [{ k: 'list', n: '运行实例' }, { k: 'stat', n: '运行监控' }] },
+        { name: 'MCP市场 MCPMKT', items: [{ k: 'api', n: 'MCP服务' }, { k: 'list', n: '我的MCP' }] },
+        { name: '智能体记忆 AMS', items: [{ k: 'list', n: '记忆库列表' }] },
+        { name: '智能体交互 AIMI', items: [{ k: 'list', n: '应用列表' }] }
+      ],
+      'Serverless工作台': [
+        { name: '函数计算 FC', open: true, items: [{ k: 'list', n: '函数列表', active: true }, { k: 'stat', n: '调用监控' }, { k: 'rg', n: '资源组详情' }] },
+        { name: '应用引擎 SAE', items: [{ k: 'list', n: '应用列表' }, { k: 'stat', n: '运行监控' }] },
+        { name: 'API网关 APIGW', items: [{ k: 'api', n: 'API管理' }, { k: 'ip', n: '访问控制' }] }
+      ],
+      '计算工作台': [
+        { name: '云服务器 ECS', open: true, items: [{ k: 'list', n: '实例列表', active: true }, { k: 'model', n: '镜像' }, { k: 'stat', n: '监控' }, { k: 'rg', n: '资源组详情' }] },
+        { name: '容器服务 CIS', items: [{ k: 'list', n: '集群列表' }, { k: 'stat', n: '集群监控' }] },
+        { name: '容器镜像 CRS', items: [{ k: 'list', n: '镜像仓库' }] }
+      ],
+      '数据库工作台': [
+        { name: '云数据库 MySQL', open: true, items: [{ k: 'list', n: '实例列表', active: true }, { k: 'stat', n: '性能监控' }, { k: 'rg', n: '资源组详情' }] },
+        { name: '云数据库 Redis', items: [{ k: 'list', n: '实例列表' }, { k: 'stat', n: '性能监控' }] },
+        { name: '向量数据库 VDB', items: [{ k: 'list', n: '实例列表' }] }
+      ],
+      '存储工作台': [
+        { name: '对象存储 OBS', open: true, items: [{ k: 'list', n: 'Bucket列表', active: true }, { k: 'stat', n: '用量统计' }, { k: 'price', n: '定价和资源包' }] },
+        { name: '文件存储 NAS', items: [{ k: 'list', n: '文件系统' }] },
+        { name: '云硬盘 EBS', items: [{ k: 'list', n: '云硬盘列表' }, { k: 'model', n: '快照' }] }
+      ],
+      '大数据工作台': [
+        { name: '大数据开发 DI', open: true, items: [{ k: 'list', n: '项目列表', active: true }, { k: 'stat', n: '任务运维' }] },
+        { name: '数据湖 DLK', items: [{ k: 'list', n: '数据目录' }] },
+        { name: '实时计算 RTC', items: [{ k: 'list', n: '作业列表' }, { k: 'stat', n: '作业监控' }] }
+      ],
+      'AI开发工作台': [
+        { name: 'AI开发平台 TAI', open: true, items: [{ k: 'list', n: '开发环境', active: true }, { k: 'model', n: '模型管理' }, { k: 'stat', n: '训练任务' }] },
+        { name: '在线推理 INF', items: [{ k: 'api', n: '推理服务' }, { k: 'stat', n: '服务监控' }] },
+        { name: '数据标注 LBL', items: [{ k: 'list', n: '标注任务' }] }
+      ],
+      '媒体云工作台': [
+        { name: '视频服务 VS', open: true, items: [{ k: 'list', n: '媒资管理', active: true }, { k: 'stat', n: '用量统计' }] },
+        { name: '直播服务 LIVE', items: [{ k: 'list', n: '域名管理' }, { k: 'stat', n: '直播监控' }] },
+        { name: '实时音视频 RTC', items: [{ k: 'list', n: '应用列表' }] }
+      ]
+    };
+
+    /* 相关工作台推荐：由后台配置下发（此处为模拟的后台配置数据） */
+    var RELATED_WB_CONFIG = {
+      '智能体工作台': ['AI开发工作台', 'Serverless工作台', '计算工作台'],
+      'Serverless工作台': ['智能体工作台', '计算工作台', '存储工作台'],
+      '计算工作台': ['存储工作台', '数据库工作台', 'Serverless工作台'],
+      '数据库工作台': ['计算工作台', '存储工作台', '大数据工作台'],
+      '存储工作台': ['计算工作台', '媒体云工作台', '大数据工作台'],
+      '大数据工作台': ['数据库工作台', '存储工作台', 'AI开发工作台'],
+      'AI开发工作台': ['智能体工作台', '大数据工作台', '计算工作台'],
+      '媒体云工作台': ['存储工作台', '计算工作台']
+    };
+    var WB_COLORS = {
+      '智能体工作台': '#1E7BFF', 'Serverless工作台': '#7A5AF8', '计算工作台': '#13A8A8', '数据库工作台': '#FA8C16',
+      '存储工作台': '#2F9E44', '大数据工作台': '#E8590C', 'AI开发工作台': '#D6336C', '媒体云工作台': '#0C8CE9'
+    };
+
+    var currentWb = AGENT_WB;
+    var MENU = WB_MENUS[AGENT_WB];
+
+    var PROJECTS = [
+      { name: 'app-w827m', note: '', services: ['图像检测'], appid: 'app_175889180786673689830572', status: '有效', creator: 'shenhuanhuan', time: '2025-09-26 21:03:28' },
+      { name: 'test', note: '', services: ['文件在线解压', '语音识别(海外)', '文本翻译', '图像检测'], appid: 'app_173873973851021162394463', status: '有效', creator: '3375852737', time: '2025-02-05 15:15:39' }
+    ];
+
+    var COPY = '<svg class="awb-copy" viewBox="0 0 16 16" fill="none" title="复制"><rect x="5" y="4.5" width="7.5" height="9.5" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 11.5V3a1 1 0 011-1h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+
+    function buildMenu(menu) {
+      return menu.map(function (g, gi) {
+        return '<div class="awb-grp' + (g.open ? ' is-open' : '') + '" data-g="' + gi + '">' +
+          '<div class="awb-grp-hd"><span>' + g.name + '</span>' + ARROW + '</div>' +
+          '<div class="awb-grp-bd">' + g.items.map(function (it) {
+            return '<div class="awb-mi' + (it.active ? ' active' : '') + '">' + svg(it.k) + '<span>' + it.n + '</span></div>';
+          }).join('') + '</div></div>';
+      }).join('');
+    }
+    var menuHtml = buildMenu(MENU);
+
+    var REL_ARROW = '<svg class="awb-rel-arrow" viewBox="0 0 12 12" fill="none"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    function buildRelated(wb) {
+      var list = (RELATED_WB_CONFIG[wb] || []).filter(function (n) { return n !== wb && WB_MENUS[n]; });
+      if (!list.length) return '';
+      return '<div class="awb-rel-title">相关工作台</div>' +
+        '<div class="awb-rel-list">' + list.map(function (n) {
+          return '<a class="awb-rel-item" href="#" data-wb="' + n + '" title="前往' + n + '">' +
+            '<span class="awb-rel-ico" style="background:' + (WB_COLORS[n] || '#1E7BFF') + '">' + n.charAt(0) + '</span>' +
+            '<span class="awb-rel-name">' + n + '</span>' + REL_ARROW + '</a>';
+        }).join('') + '</div>';
+    }
+    function firstActive(menu) {
+      for (var i = 0; i < menu.length; i++) for (var j = 0; j < menu[i].items.length; j++) if (menu[i].items[j].active) return menu[i].items[j].n;
+      return menu[0].items[0].n;
+    }
+
+    var stepIco = [
+      '<svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#EAF3FF"/><rect x="10" y="12" width="20" height="16" rx="2" fill="#5AA2FF"/><rect x="10" y="12" width="20" height="5" rx="2" fill="#1E7BFF"/><rect x="13" y="20" width="9" height="2" rx="1" fill="#fff"/><rect x="13" y="24" width="6" height="2" rx="1" fill="#D6E8FF"/></svg>',
+      '<svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#EAF3FF"/><circle cx="21" cy="19" r="9" fill="#5AA2FF"/><path d="M12 28l8-8" stroke="#1E7BFF" stroke-width="3" stroke-linecap="round"/><path d="M17 15.5a5 5 0 017.5 1" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>',
+      '<svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#EAF3FF"/><path d="M20 9l9 5v12l-9 5-9-5V14l9-5z" fill="#5AA2FF"/><path d="M20 15l1.6 3.3 3.6.5-2.6 2.5.6 3.6-3.2-1.7-3.2 1.7.6-3.6-2.6-2.5 3.6-.5L20 15z" fill="#fff"/></svg>'
+    ];
+    var CHEV = '<svg class="awb-step-sep" viewBox="0 0 12 12" fill="none"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    function step(i, t, d, l) {
+      return '<div class="awb-step"><span class="awb-step-ico">' + stepIco[i] + '</span><div><div class="awb-step-t">' + t +
+        '</div><div class="awb-step-d">' + d + '<a href="#">' + l + '</a></div></div></div>';
+    }
+
+    var page = document.createElement('div');
+    page.className = 'agent-wb-page';
+    page.id = 'agent-wb-page';
+    page.hidden = true;
+    page.innerHTML =
+      '<aside class="sidebar awb-sidebar">' +
+        '<div class="sidebar-title awb-title"><span class="awb-title-text">智能体工作台</span>' +
+          '<button type="button" class="awb-fav" aria-label="收藏" title="收藏"><svg viewBox="0 0 18 18" fill="none"><path d="M9 2.3l2 4.1 4.5.6-3.3 3.2.8 4.5L9 12.6l-4 2.1.8-4.5L2.5 7l4.5-.6L9 2.3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></button>' +
+        '</div>' +
+        '<div class="menu awb-menu">' + menuHtml + '</div>' +
+        '<div class="awb-related" id="awb-related">' + buildRelated(AGENT_WB) + '</div>' +
+      '</aside>' +
+      '<main class="main-content">' +
+        '<div class="page-title-bar awb-title-bar"><h1 class="page-title">项目列表</h1><a class="page-title-doc" href="#">APIMKT 帮助文档</a></div>' +
+        '<div class="content-body awb-generic-body" id="awb-generic" hidden>' +
+          '<section class="awb-card awb-generic-card">' +
+            '<div class="awb-generic-ico" id="awb-generic-ico"></div>' +
+            '<div class="awb-generic-t" id="awb-generic-t"></div>' +
+            '<div class="awb-generic-d">该工作台页面为原型演示，具体内容以实际产品为准</div>' +
+          '</section>' +
+        '</div>' +
+        '<div class="content-body" id="awb-agent-body">' +
+          '<section class="awb-card awb-guide is-open">' +
+            '<div class="awb-guide-hd"><span>使用教程</span><svg class="awb-guide-arrow" viewBox="0 0 12 12" fill="none"><path d="M2 7.5L6 3.5l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+            '<div class="awb-guide-bd">' +
+              step(0, '创建项目', '选择所需要的服务，详见', '创建项目') + CHEV +
+              step(1, '项目授权', '支持AK/SK和APIKey两种鉴权方式，详见', '鉴权说明') + CHEV +
+              step(2, '调用服务', '根据API接口文档构造请求，详见', '调用规范') +
+            '</div>' +
+          '</section>' +
+          '<section class="awb-card awb-list">' +
+            '<div class="card-toolbar awb-toolbar">' +
+              '<div class="search-box awb-search"><input type="text" id="awb-search" placeholder="请输入项目名称或apiKey" aria-label="请输入项目名称或apiKey">' +
+                '<button class="search-btn" type="button" aria-label="搜索"><svg viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.6" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>' +
+              '<button class="btn-primary" type="button" id="awb-create">创建项目</button>' +
+            '</div>' +
+            '<div class="table-wrap">' +
+              '<table class="data-table awb-table"><colgroup>' +
+                '<col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:7%"><col style="width:9%"><col style="width:12%"><col style="width:14%">' +
+              '</colgroup><thead><tr><th>项目名称</th><th>项目备注</th><th>调用服务</th><th>APPID</th><th>状态</th><th>创建人</th><th>创建时间</th><th>操作</th></tr></thead>' +
+              '<tbody id="awb-tbody"></tbody></table>' +
+              '<div class="empty-tip" id="awb-empty" hidden>暂无匹配的项目</div>' +
+            '</div>' +
+            '<div class="pagination">' +
+              '<div class="page-summary">共 <span class="num" id="awb-total">0</span> 条记录 第 <span class="num">1</span> / 1 页</div>' +
+              '<div class="page-controls">' +
+                '<button class="page-btn nav" type="button" disabled aria-label="上一页"><svg viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+                '<div class="pager"><button class="page-btn active awb-page-on" type="button">1</button></div>' +
+                '<button class="page-btn nav" type="button" disabled aria-label="下一页"><svg viewBox="0 0 12 12" fill="none"><path d="M4.5 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+                '<div class="page-size"><select aria-label="每页条数"><option>10 条/页</option><option>20 条/页</option><option>50 条/页</option></select></div>' +
+                '<div class="page-jump"><span>跳至</span><input type="text" aria-label="跳至页码"><span>页</span></div>' +
+              '</div>' +
+            '</div>' +
+          '</section>' +
+        '</div>' +
+      '</main>';
+    document.querySelector('.app').appendChild(page);
+
+    var tbody = page.querySelector('#awb-tbody');
+    var expanded = {};
+    function render() {
+      var q = page.querySelector('#awb-search').value.trim().toLowerCase();
+      var list = PROJECTS.filter(function (p) {
+        return !q || p.name.toLowerCase().indexOf(q) > -1 || p.appid.toLowerCase().indexOf(q) > -1;
+      });
+      tbody.innerHTML = list.map(function (p) {
+        var idx = PROJECTS.indexOf(p);
+        var more = p.services.length > 2;
+        var shown = more && !expanded[idx] ? p.services.slice(0, 2) : p.services;
+        return '<tr>' +
+          '<td><a class="awb-link" href="#">' + p.name + '</a>' + COPY + '</td>' +
+          '<td>' + (p.note || '') + '</td>' +
+          '<td><div class="awb-svc"><div class="awb-svc-list">' + shown.map(function (s) { return '<a class="awb-link" href="#">' + s + '</a>'; }).join('') + '</div>' +
+            (more ? '<a class="awb-expand" href="#" data-i="' + idx + '">' + (expanded[idx] ? '收起' : '展开') +
+              '<svg viewBox="0 0 12 12" fill="none" class="' + (expanded[idx] ? 'up' : '') + '"><path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>' : '') +
+          '</div></td>' +
+          '<td class="awb-appid">' + p.appid + '<br>' + COPY + '</td>' +
+          '<td>' + p.status + '</td>' +
+          '<td>' + p.creator + '</td>' +
+          '<td>' + p.time + '</td>' +
+          '<td><div class="row-actions awb-actions"><a href="#">编辑</a><a href="#" data-del="' + idx + '">删除</a><a href="#">使用统计</a></div></td>' +
+        '</tr>';
+      }).join('');
+      page.querySelector('#awb-total').textContent = list.length;
+      page.querySelector('#awb-empty').hidden = list.length > 0;
+    }
+    render();
+
+    page.querySelector('#awb-search').addEventListener('input', render);
+
+    /* 切换到指定工作台：更新标题、菜单、相关工作台推荐与主内容区 */
+    function switchWb(wb) {
+      if (!WB_MENUS[wb]) wb = AGENT_WB;
+      currentWb = wb;
+      var menu = WB_MENUS[wb];
+      var isAgent = wb === AGENT_WB;
+      var menuName = firstActive(menu);
+      page.querySelector('.awb-title-text').textContent = wb;
+      page.querySelector('.awb-menu').innerHTML = buildMenu(menu);
+      page.querySelector('.awb-menu').scrollTop = 0;
+      page.querySelector('#awb-related').innerHTML = buildRelated(wb);
+      page.querySelector('.awb-fav').classList.remove('is-fav');
+      page.querySelector('.awb-title-bar .page-title').textContent = menuName;
+      var code = (menu[0].name.split(' ')[1] || menu[0].name);
+      page.querySelector('.page-title-doc').textContent = code + ' 帮助文档';
+      page.querySelector('#awb-agent-body').hidden = !isAgent;
+      page.querySelector('#awb-generic').hidden = isAgent;
+      if (!isAgent) updateGeneric(menuName);
+    }
+    function updateGeneric(menuName) {
+      var ico = page.querySelector('#awb-generic-ico');
+      ico.textContent = currentWb.charAt(0);
+      ico.style.background = WB_COLORS[currentWb] || '#1E7BFF';
+      page.querySelector('#awb-generic-t').textContent = currentWb + ' · ' + menuName;
+    }
+
+    page.addEventListener('click', function (e) {
+      var t;
+      if ((t = e.target.closest('.awb-rel-item'))) {
+        e.preventDefault();
+        switchWb(t.getAttribute('data-wb'));
+        return;
+      }
+      if ((t = e.target.closest('.awb-grp-hd'))) { t.parentNode.classList.toggle('is-open'); return; }
+      if ((t = e.target.closest('.awb-mi'))) {
+        page.querySelectorAll('.awb-mi').forEach(function (m) { m.classList.toggle('active', m === t); });
+        page.querySelector('.awb-title-bar .page-title').textContent = t.textContent.trim();
+        if (currentWb !== AGENT_WB) updateGeneric(t.textContent.trim());
+        return;
+      }
+      if ((t = e.target.closest('.awb-guide-hd'))) { t.parentNode.classList.toggle('is-open'); return; }
+      if ((t = e.target.closest('.awb-fav'))) { t.classList.toggle('is-fav'); return; }
+      if ((t = e.target.closest('.awb-expand'))) {
+        e.preventDefault();
+        var i = t.getAttribute('data-i');
+        expanded[i] = !expanded[i];
+        render();
+        return;
+      }
+      if (e.target.closest('.awb-copy')) { toast('复制成功'); return; }
+      if ((t = e.target.closest('[data-del]'))) {
+        e.preventDefault();
+        var p = PROJECTS[+t.getAttribute('data-del')];
+        openConfirm('确定删除项目「' + p.name + '」吗？删除后不可恢复。', function () {
+          PROJECTS.splice(PROJECTS.indexOf(p), 1);
+          expanded = {};
+          render();
+          toast('删除成功');
+        }, { title: '删除项目', okText: '确定删除' });
+        return;
+      }
+      if (e.target.closest('#awb-create')) { toast('创建项目功能演示'); return; }
+      if (e.target.closest('a[href="#"]')) e.preventDefault();
+    });
+
+    function open(wb) {
+      switchWb(typeof wb === 'string' ? wb : AGENT_WB);
+      var dashPage = $('dashboard-page');
+      if (dashPage && !dashPage.hidden) {
+        document.querySelectorAll('.nav-btn').forEach(function (b) {
+          if (b.textContent.indexOf('工作台总览') > -1) b.click();
+        });
+      }
+      var pf = $('profile-page');
+      if (pf) pf.hidden = true;
+      page.hidden = false;
+    }
+    function close() { page.hidden = true; }
+    agentWbApi.open = open;
+
+    // 离开：顶部导航 / 访问控制菜单 / 头像下拉「个人信息」
+    document.querySelectorAll('.nav-btn:not(.rg-switch-btn), .menu-link[data-page], #ud-profile').forEach(function (n) {
+      n.addEventListener('click', close);
+    });
+
+    // 总览页工作台卡片入口
+    document.querySelectorAll('.dash-wb-card').forEach(function (c) {
+      var n = c.textContent.trim();
+      if (WB_MENUS[n]) {
+        c.addEventListener('click', function (e) { e.preventDefault(); open(n); });
+      }
+    });
+  }
+
+  initAgentWorkbench();
+  initWorkbenchFlyout();
+
 })();
